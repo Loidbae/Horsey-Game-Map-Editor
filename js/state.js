@@ -160,7 +160,7 @@ HME.ACK_KEY         = 'hme_v1_acknowledged';
 HME.defaultSettings = function() {
   return {
     gridColorHex: '#ffffff',
-    gridAlpha: 0.07,
+    gridAlpha: 0.70,
     paintTool: 'brush',
     brushSize: 1,
     brushShape: 'round',

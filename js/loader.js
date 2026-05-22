@@ -84,6 +84,13 @@ HME.handleFiles = async function(fileList) {
 
     HME.parseTMX(tmxText);
 
+    const SPAWNER_EXCEPTIONS = new Set([145, 153]);
+    HME._requiredLocGIDs = new Set(
+      HME.state.map.objects
+        .filter(o => !HME.SPAWNER_GIDS[o.gid] || SPAWNER_EXCEPTIONS.has(o.gid))
+        .map(o => o.gid)
+    );
+
     if (found.terrainXML) {
       const xml = await HME.readText(found.terrainXML);
       HME.terrainAtlas = HME.parseAtlasXML(xml);

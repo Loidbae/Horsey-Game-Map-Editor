@@ -153,7 +153,7 @@ HME.render = function() {
   const showGrid = document.getElementById('tog-grid')?.checked;
   if (showGrid && ts > 4) {
     const gc = (HME.settings && HME.settings.gridColorHex) ? HME.settings.gridColorHex : '#ffffff';
-    const ga = (HME.settings && HME.settings.gridAlpha !== undefined) ? HME.settings.gridAlpha : 0.07;
+    const ga = (HME.settings && HME.settings.gridAlpha !== undefined) ? HME.settings.gridAlpha : 0.70;
     const gcRgb = HME.hexToRgb(gc);
     ctx.strokeStyle = `rgba(${gcRgb.r},${gcRgb.g},${gcRgb.b},${ga})`;
     ctx.lineWidth   = 0.5;

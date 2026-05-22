@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -43,27 +43,27 @@
       <strong>Where is your game folder?</strong>
       <div class="os-path-list">
         <div class="os-path-row">
-          <span class="os-icon"><i class="ti ti-brand-windows"></i> Windows</span>
+          <span class="os-icon"><i class="ph ph-windows-logo"></i> Windows</span>
           <code>C:\Program Files (x86)\Steam\steamapps\common\Horsey Game</code>
         </div>
         <div class="os-path-row">
-          <span class="os-icon"><i class="ti ti-brand-apple"></i> macOS</span>
+          <span class="os-icon"><i class="ph ph-apple-logo"></i> macOS</span>
           <code>~/Library/Application Support/Steam/steamapps/common/Horsey Game</code>
         </div>
         <div class="os-path-row">
-          <span class="os-icon"><i class="ti ti-brand-ubuntu"></i> Linux</span>
+          <span class="os-icon"><i class="ph ph-linux-logo"></i> Linux</span>
           <code>~/.steam/steam/steamapps/common/Horsey Game</code>
         </div>
       </div>
     </div>
 
     <button class="btn-primary" onclick="document.getElementById('folder-input').click()">
-      <i class="ti ti-folder-open"></i> Select Steam Game Folder
+      <i class="ph ph-folder-open"></i> Select Steam Game Folder
     </button>
     <input type="file" id="folder-input" webkitdirectory multiple>
 
     <button class="btn-secondary" onclick="document.getElementById('files-input').click()">
-      <i class="ti ti-file-import"></i> Select Files Manually
+      <i class="ph ph-file-arrow-up"></i> Select Files Manually
     </button>
     <input type="file" id="files-input" multiple accept=".tmx,.tsx,.xml,.png,.json">
 
@@ -79,53 +79,53 @@
   <div class="menubar">
     <span class="menu-title">Horsey Map Editor</span>
     <div class="menu-sep"></div>
-    <button class="menu-btn" onclick="HME.openNewFiles()"><i class="ti ti-folder-open"></i> Load</button>
-    <button class="menu-btn" onclick="HME.doSaveAs()"><i class="ti ti-download"></i> Download Map</button>
+    <button class="menu-btn" onclick="HME.openNewFiles()"><i class="ph ph-folder-open"></i> Load</button>
+    <button id="btn-download-map" class="menu-btn" onclick="HME.doSaveAs()"><i class="ph ph-download-simple"></i> Download Map</button>
 
     <!-- Help split button -->
     <div class="menu-btn-group" id="help-btn-wrap">
       <button class="menu-btn help-btn" id="btn-help" onclick="HME.toggleHelpDropdown(event)">
-        <i class="ti ti-help-circle"></i> Help
+        <i class="ph ph-question"></i> Help
       </button>
       <div class="menu-dropdown" id="help-dropdown">
         <div class="menu-dd-item" onclick="HME.showInstallMapModal(true)">
-          <i class="ti ti-map-down"></i> Install Map Instructions
+          <i class="ph ph-map-trifold"></i> Install Map Instructions
         </div>
       </div>
     </div>
 
     <div class="menu-spacer"></div>
     <button class="menu-btn settings-btn" onclick="HME.openSettings()" title="Settings">
-      <i class="ti ti-settings"></i> Settings
+      <i class="ph ph-gear-six"></i> Settings
     </button>
   </div>
 
   <!-- Toolbar -->
   <div class="toolbar">
     <button class="tool-btn active" id="btn-inspect" onclick="HME.setMode('inspect')">
-      <i class="ti ti-pointer"></i> Inspect
+      <i class="ph ph-cursor"></i> Inspect
     </button>
     <div class="tool-btn-group" id="btn-paint-wrap">
       <button class="tool-btn tool-btn-main" id="btn-paint" onclick="HME.setMode('paint')">
-        <i class="ti ti-brush" id="paint-tool-icon"></i> <span id="paint-tool-label">Paint</span>
+        <i class="ph ph-paintbrush" id="paint-tool-icon"></i> <span id="paint-tool-label">Paint</span>
       </button>
       <button class="tool-btn tool-btn-arrow" onclick="HME.togglePaintDropdown(event)" title="Paint sub-tools">
-        <i class="ti ti-chevron-down" style="font-size:10px"></i>
+        <i class="ph ph-caret-down" style="font-size:14px"></i>
       </button>
       <div class="tool-dropdown" id="paint-dropdown">
         <div class="tool-dd-item active" data-tool="brush" onclick="HME.setPaintTool('brush');HME.setMode('paint');HME.closePaintDropdown()">
-          <span><i class="ti ti-brush"></i> Brush</span><span class="dd-key" id="kb-brush">B</span>
+          <span><i class="ph ph-paintbrush"></i> Brush</span><span class="dd-key" id="kb-brush">B</span>
         </div>
         <div class="tool-dd-item" data-tool="pipette" onclick="HME.setPaintTool('pipette');HME.setMode('paint');HME.closePaintDropdown()">
-          <span><i class="ti ti-eyedropper"></i> Pipette</span><span class="dd-key" id="kb-pipette">P</span>
+          <span><i class="ph ph-eyedropper"></i> Pipette</span><span class="dd-key" id="kb-pipette">P</span>
         </div>
         <div class="tool-dd-item" data-tool="fill" onclick="HME.setPaintTool('fill');HME.setMode('paint');HME.closePaintDropdown()">
-          <span><i class="ti ti-bucket"></i> Fill</span><span class="dd-key" id="kb-fill">G</span>
+          <span><i class="ph ph-paint-bucket"></i> Fill</span><span class="dd-key" id="kb-fill">G</span>
         </div>
       </div>
     </div>
     <button class="tool-btn" id="btn-object" onclick="HME.setMode('object')">
-      <i class="ti ti-map-pin"></i> Object
+      <i class="ph ph-map-pin"></i> Object
     </button>
     <div class="tool-sep"></div>
     <label class="toggle-lbl">
@@ -136,21 +136,21 @@
     </label>
     <div class="tool-sep"></div>
     <button class="tool-btn" id="btn-restore" onclick="HME.doRestore()" title="Restore saved original map">
-      <i class="ti ti-history"></i> Restore
+      <i class="ph ph-clock-counter-clockwise"></i> Restore
     </button>
     <div class="menu-spacer"></div>
     <div class="tool-sep"></div>
     <button class="tool-btn" id="btn-undo" onclick="HME.doUndo()" title="Ctrl+Z / Cmd+Z">
-      <i class="ti ti-arrow-back-up"></i> Undo
+      <i class="ph ph-arrow-counter-clockwise"></i> Undo
     </button>
     <button class="tool-btn" id="btn-redo" onclick="HME.doRedo()" title="Ctrl+Y / Ctrl+Shift+Z">
-      <i class="ti ti-arrow-forward-up"></i> Redo
+      <i class="ph ph-arrow-clockwise"></i> Redo
     </button>
   </div>
 
   <!-- Warning bar -->
   <div id="warn-bar">
-    <i class="ti ti-alert-triangle" style="font-size:14px"></i>
+    <i class="ph ph-warning" style="font-size:14px"></i>
     Missing required Locs objects — export is blocked until all required GIDs are placed.
   </div>
 
@@ -198,7 +198,7 @@
         <div class="r-row"><span class="r-lbl">Y (px)</span><span class="r-val" id="oi-y">—</span></div>
         <div class="obj-actions">
           <button class="act-btn danger" onclick="HME.removeSelectedObj()">
-            <i class="ti ti-trash"></i> Remove
+            <i class="ph ph-trash"></i> Remove
           </button>
         </div>
       </div>
@@ -219,7 +219,7 @@
     <div class="settings-modal">
       <div class="settings-hdr">
         <span>Settings</span>
-        <button class="settings-close" onclick="HME.closeSettings()"><i class="ti ti-x"></i></button>
+        <button class="settings-close" onclick="HME.closeSettings()"><i class="ph ph-x"></i></button>
       </div>
 
       <div class="settings-body">
@@ -232,23 +232,14 @@
           <div class="settings-row">
             <span class="settings-lbl">Grid opacity</span>
             <div style="display:flex;align-items:center;gap:6px">
-              <input type="range" id="set-grid-alpha" class="range-input" min="0" max="1" step="0.01" value="0.07" oninput="HME.updateGridColor();document.getElementById('set-grid-alpha-val').textContent=Math.round(this.value*100)+'%'">
-              <span class="settings-val" id="set-grid-alpha-val">7%</span>
+              <input type="range" id="set-grid-alpha" class="range-input" min="0" max="1" step="0.01" value="0.70" oninput="HME.updateGridColor();document.getElementById('set-grid-alpha-val').textContent=Math.round(this.value*100)+'%'">
+              <span class="settings-val" id="set-grid-alpha-val">70%</span>
             </div>
           </div>
         </div>
 
         <div class="settings-section">
-          <div class="settings-sec-title">Preferences</div>
-          <div class="settings-row">
-            <button id="btn-reset-donotask" class="settings-wide-btn" onclick="HME.resetAllDoNotAsk()">
-              Reset All "Do Not Ask" Choices
-            </button>
-          </div>
-        </div>
-
-        <div class="settings-section">
-          <div class="settings-sec-title">Keybinds <span style="font-size:10px;font-weight:400;color:var(--text2)">(click to rebind)</span></div>
+          <div class="settings-sec-title">Keybinds <span style="font-size:14px;font-weight:400;color:var(--text2)">(click to rebind)</span></div>
           <div class="settings-row">
             <span class="settings-lbl">Inspect mode</span>
             <button class="keybind-btn" data-action="modeInspect" onclick="HME.captureKeybind(this)">V</button>
@@ -273,7 +264,8 @@
       </div>
 
       <div class="settings-footer">
-        <button class="btn-secondary" style="padding:6px 14px;font-size:12px" onclick="HME.resetSettings()">Reset Defaults</button>
+        <button id="btn-reset-donotask" class="btn-secondary" style="padding:6px 14px;font-size:14px" onclick="HME.resetAllDoNotAsk()">Reset "Do not show again" choices</button>
+        <button class="btn-secondary" style="padding:6px 14px;font-size:14px" onclick="HME.resetSettings()">Reset Defaults</button>
       </div>
     </div>
   </div>
@@ -327,10 +319,10 @@
       </div>
       <div class="modal-footer">
         <button class="btn-primary" style="margin-bottom:6px" onclick="HME.saveCurrentAsOriginal()">
-          <i class="ti ti-device-floppy"></i> Save This Version as Starting Point
+          <i class="ph ph-floppy-disk"></i> Save This Version as Starting Point
         </button>
         <button class="btn-secondary" style="margin-bottom:6px" onclick="HME.closeNoOriginalPopup();HME.openNewFiles()">
-          <i class="ti ti-file-import"></i> Load a File
+          <i class="ph ph-file-arrow-up"></i> Load a File
         </button>
         <button class="btn-secondary" onclick="HME.closeNoOriginalPopup()">Cancel</button>
       </div>
@@ -345,11 +337,11 @@
         <p>Your current work will be gone forever if you have not saved it first.</p>
       </div>
       <div class="modal-dna-row">
-        <input type="checkbox" id="restore-dna-check"> <label for="restore-dna-check">Don't ask me again</label>
+        <input type="checkbox" id="restore-dna-check"> <label for="restore-dna-check">Don't show this again</label>
       </div>
       <div class="modal-footer">
         <button class="btn-primary" style="margin-bottom:6px" onclick="HME.confirmRestore()">
-          <i class="ti ti-history"></i> Yes, Restore
+          <i class="ph ph-clock-counter-clockwise"></i> Yes, Restore
         </button>
         <button class="btn-secondary" onclick="HME.closeRestoreConfirmPopup()">Cancel</button>
       </div>
@@ -361,18 +353,24 @@
     <div class="modal-card install-card">
       <div class="modal-title-row">
         <div class="modal-title-big">READ THIS</div>
-        <button class="modal-close-btn" onclick="HME.closeInstallMapModal()"><i class="ti ti-x"></i></button>
+        <button class="modal-close-btn" onclick="HME.closeInstallMapModal()"><i class="ph ph-x"></i></button>
       </div>
       <div class="modal-body install-body">
         <p class="install-intro">Downloading the map does <strong>not</strong> automatically update your game. You must copy the file into your game folder yourself.</p>
 
+        <div class="install-warning-box">
+          <i class="ph ph-warning"></i>
+          <span><strong>You must start a brand new save file</strong> to see your map changes in-game. Loading an existing save will <strong>not</strong> reflect the new map.</span>
+        </div>
+
         <div class="install-section" data-os="win">
           <div class="install-os-row">
-            <span class="os-badge win-badge"><i class="ti ti-brand-windows"></i> Windows</span>
+            <span class="os-badge win-badge"><i class="ph ph-windows-logo"></i> Windows</span>
           </div>
           <ol class="install-steps">
             <li>Download <code>horsey.tmx</code> using the button below.</li>
             <li>Open your Steam game folder:<br><code>C:\Program Files (x86)\Steam\steamapps\common\Horsey Game\Resources</code></li>
+            <li>Back up your existing <code>horsey.tmx</code> before continuing — rename it to <code>horsey.tmx.bak</code> or copy it somewhere safe.</li>
             <li>Replace the existing <code>horsey.tmx</code> with the one you downloaded.</li>
             <li>Start the game and enjoy your changes.</li>
           </ol>
@@ -380,11 +378,14 @@
 
         <div class="install-section" data-os="mac">
           <div class="install-os-row">
-            <span class="os-badge mac-badge"><i class="ti ti-brand-apple"></i> macOS</span>
+            <span class="os-badge mac-badge"><i class="ph ph-apple-logo"></i> macOS</span>
           </div>
           <ol class="install-steps">
             <li>Download <code>horsey.tmx</code> using the button below.</li>
-            <li>Open Finder and navigate to:<br><code>~/Library/Application Support/Steam/steamapps/common/Horsey Game/Resources</code></li>
+            <li>Open Finder and navigate to your Steam game folder:<br><code>~/Library/Application Support/Steam/steamapps/common/Horsey Game</code></li>
+            <li>Right-click <code>Horsey Game.app</code> and choose <strong>Show Package Contents</strong>.</li>
+            <li>Navigate into <code>Contents/Resources/</code>.</li>
+            <li>Back up your existing <code>horsey.tmx</code> before continuing — rename it to <code>horsey.tmx.bak</code> or copy it somewhere safe.</li>
             <li>Replace the existing <code>horsey.tmx</code> with your downloaded file.</li>
             <li>Start the game and enjoy your changes.</li>
           </ol>
@@ -392,11 +393,12 @@
 
         <div class="install-section" data-os="linux">
           <div class="install-os-row">
-            <span class="os-badge linux-badge"><i class="ti ti-brand-ubuntu"></i> Linux</span>
+            <span class="os-badge linux-badge"><i class="ph ph-linux-logo"></i> Linux</span>
           </div>
           <ol class="install-steps">
             <li>Download <code>horsey.tmx</code> using the button below.</li>
             <li>Navigate to your game folder:<br><code>~/.steam/steam/steamapps/common/Horsey Game/Resources</code></li>
+            <li>Back up your existing <code>horsey.tmx</code> before continuing — rename it to <code>horsey.tmx.bak</code> or copy it somewhere safe.</li>
             <li>Replace the existing <code>horsey.tmx</code> with your downloaded file.</li>
             <li>Start the game and enjoy your changes.</li>
           </ol>
@@ -407,7 +409,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn-primary" onclick="HME.doDownloadFromModal()">
-          <i class="ti ti-download"></i> Download Map File
+          <i class="ph ph-download-simple"></i> Download Map File
         </button>
       </div>
     </div>

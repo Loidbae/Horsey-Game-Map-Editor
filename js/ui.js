@@ -23,16 +23,12 @@ HME.setMode = function(mode) {
   const titles = { inspect: 'Objects', paint: 'Terrain Tiles', object: 'Locs Objects' };
   document.getElementById('left-title').textContent = titles[mode];
 
-  if (mode === 'object') {
-    HME.updateObjectWarning();
-    document.getElementById('warn-bar').classList.add('show');
-  } else {
-    document.getElementById('warn-bar').classList.remove('show');
-    if (mode !== 'inspect') {
-      HME.state.selObj = null;
-      document.getElementById('obj-inspector').style.display = 'none';
-    }
+  if (mode !== 'object' && mode !== 'inspect') {
+    HME.state.selObj = null;
+    document.getElementById('obj-inspector').style.display = 'none';
   }
+
+  HME.updateObjectWarning();
 
   if (mode === 'paint') {
     HME.updatePaintInspector();
@@ -46,16 +42,85 @@ HME.updateObjectWarning = function() {
   if (!warnBar || !HME.state.map) return;
 
   const placedGIDs = new Set(HME.state.map.objects.map(o => o.gid));
-  const required   = Object.keys(HME.SPAWNER_GIDS).map(Number).filter(g => g !== 154);
-  const missing    = required.filter(g => !placedGIDs.has(g));
+  const required   = HME._requiredLocGIDs || new Set();
+  const missingSet = new Set([...required].filter(g => !placedGIDs.has(g)));
 
-  if (missing.length === 0) {
+  if (!HME._missingLocQueue) HME._missingLocQueue = [];
+  HME._missingLocQueue = HME._missingLocQueue.filter(g => missingSet.has(g));
+  missingSet.forEach(g => {
+    if (!HME._missingLocQueue.includes(g)) HME._missingLocQueue.push(g);
+  });
+
+  const dlBtn = document.getElementById('btn-download-map');
+  if (dlBtn) dlBtn.disabled = HME._missingLocQueue.length > 0;
+
+  if (HME._missingLocQueue.length === 0) {
     warnBar.classList.remove('show');
   } else {
-    const names = missing.map(g => HME.SPAWNER_GIDS[g]).join(', ');
-    warnBar.innerHTML = `<i class="ti ti-alert-triangle" style="font-size:14px"></i> Missing spawners: <strong>${names}</strong>`;
+    const locsFirst  = (HME.state.map.tilesets.find(ts => ts.source && ts.source.includes('locs'))?.firstgid) || 97;
+    const gidToType  = {};
+    HME.state.map.objects.forEach(o => { if (o.type && o.type.trim()) gidToType[o.gid] = o.type.trim(); });
+    const names = HME._missingLocQueue.map(g => {
+      const sprite = HME.locsAtlas ? HME.locsAtlas[g - locsFirst] : null;
+      const raw = gidToType[g] || (sprite ? sprite.name : `GID ${g}`);
+      return raw.replace(/^[Ll]oc/, '');
+    }).join(', ');
+    warnBar.innerHTML = `<i class="ph ph-warning" style="font-size:14px"></i> Missing locations: <strong>${names}</strong>`;
     warnBar.classList.add('show');
   }
+
+  if (HME.state.mode === 'object') HME._refreshMissingHighlights();
+};
+
+HME._refreshMissingHighlights = function() {
+  const queue        = HME._missingLocQueue || [];
+  const primaryGID   = queue[0];
+  const secondarySet = new Set(queue.slice(1));
+
+  document.querySelectorAll('.o-chip[data-gid]').forEach(chip => {
+    const gid        = +chip.dataset.gid;
+    const wasPrimary = chip.classList.contains('spawner-missing-primary');
+    chip.classList.remove('spawner-missing-primary', 'spawner-missing-secondary');
+
+    if (gid === primaryGID) {
+      if (!wasPrimary) void chip.offsetWidth;
+      chip.classList.add('spawner-missing-primary');
+    } else if (secondarySet.has(gid)) {
+      chip.classList.add('spawner-missing-secondary');
+    }
+  });
+
+  if (primaryGID === undefined) {
+    if (HME._scrollLerpRaf) { cancelAnimationFrame(HME._scrollLerpRaf); HME._scrollLerpRaf = null; }
+    return;
+  }
+
+  const primaryChip = document.querySelector(`.o-chip[data-gid="${primaryGID}"]`);
+  const pal = document.getElementById('object-pal');
+  if (primaryChip && pal) {
+    HME._lerpScrollTo(pal, primaryChip);
+
+    document.querySelectorAll('.o-chip').forEach(c => c.classList.remove('sel'));
+    primaryChip.classList.add('sel');
+    HME.state.selLocGID = primaryGID;
+    const locsFirst = (HME.state.map.tilesets.find(ts => ts.source && ts.source.includes('locs'))?.firstgid) || 97;
+    const sprite = HME.locsAtlas ? HME.locsAtlas[primaryGID - locsFirst] : null;
+    HME.state.selLocType = sprite ? sprite.name : `GID ${primaryGID}`;
+  }
+};
+
+HME._lerpScrollTo = function(container, target) {
+  if (HME._scrollLerpRaf) cancelAnimationFrame(HME._scrollLerpRaf);
+  const targetScroll = target.offsetTop - container.clientHeight / 2 + target.offsetHeight / 2;
+  const clamped = Math.max(0, Math.min(targetScroll, container.scrollHeight - container.clientHeight));
+
+  function step() {
+    const diff = clamped - container.scrollTop;
+    if (Math.abs(diff) < 0.5) { container.scrollTop = clamped; return; }
+    container.scrollTop += diff * 0.12;
+    HME._scrollLerpRaf = requestAnimationFrame(step);
+  }
+  HME._scrollLerpRaf = requestAnimationFrame(step);
 };
 
 HME.updateInspector = function(col, row) {
@@ -159,11 +224,11 @@ HME.setPaintTool = function(tool) {
     el.classList.toggle('active', el.dataset.tool === tool);
   });
 
-  const icons  = { brush: 'ti-brush', pipette: 'ti-eyedropper', fill: 'ti-bucket' };
+  const icons  = { brush: 'ph-paint-brush', pipette: 'ph-eyedropper', fill: 'ph-paint-bucket' };
   const labels = { brush: 'Paint', pipette: 'Pipette', fill: 'Fill' };
   const iconEl  = document.getElementById('paint-tool-icon');
   const labelEl = document.getElementById('paint-tool-label');
-  if (iconEl)  iconEl.className  = `ti ${icons[tool] || 'ti-brush'}`;
+  if (iconEl)  iconEl.className  = `ph ${icons[tool] || 'ph-paint-brush'}`;
   if (labelEl) labelEl.textContent = labels[tool] || 'Paint';
 
   HME.saveSettings();
@@ -185,9 +250,9 @@ HME.openSettings = function() {
   const gcInput = document.getElementById('set-grid-color');
   const gaInput = document.getElementById('set-grid-alpha');
   if (gcInput) gcInput.value = HME.settings.gridColorHex || '#ffffff';
-  if (gaInput) gaInput.value = HME.settings.gridAlpha !== undefined ? HME.settings.gridAlpha : 0.07;
+  if (gaInput) gaInput.value = HME.settings.gridAlpha !== undefined ? HME.settings.gridAlpha : 0.70;
   const gaVal = document.getElementById('set-grid-alpha-val');
-  if (gaVal) gaVal.textContent = Math.round((HME.settings.gridAlpha || 0.07) * 100) + '%';
+  if (gaVal) gaVal.textContent = Math.round((HME.settings.gridAlpha || 0.70) * 100) + '%';
 
   const kb = HME.settings.keybinds;
   document.querySelectorAll('.keybind-btn[data-action]').forEach(btn => {
@@ -207,7 +272,7 @@ HME.updateGridColor = function() {
   const gc = document.getElementById('set-grid-color').value;
   const ga = parseFloat(document.getElementById('set-grid-alpha').value);
   HME.settings.gridColorHex = gc;
-  HME.settings.gridAlpha    = isNaN(ga) ? 0.07 : Math.max(0, Math.min(1, ga));
+  HME.settings.gridAlpha    = isNaN(ga) ? 0.70 : Math.max(0, Math.min(1, ga));
   HME.saveSettings();
   HME.render();
 };
@@ -264,7 +329,7 @@ HME.resetAllDoNotAsk = function() {
   const btn = document.getElementById('btn-reset-donotask');
   if (btn) {
     btn.textContent = '✓ Done';
-    setTimeout(() => { btn.textContent = 'Reset All "Do Not Ask" Choices'; }, 1800);
+    setTimeout(() => { btn.textContent = 'Reset "Do not show again" choices'; }, 1800);
   }
 };
 

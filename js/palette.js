@@ -247,6 +247,8 @@ HME.buildObjectPal = function() {
     return makeChip(gid, label);
   });
 
-  const spawnerInfoHtml = `<span class="spawner-info-btn" title="What is a Spawner?&#10;&#10;A Spawner is a named spot on the map where the game places animals, vehicles, or special objects when the map first loads. The term &#34;Spawner&#34; was coined by the editor author — in-game these are just specific location objects, but they control where things appear at game start." tabindex="0"><i class="ti ti-info-circle"></i></span>`;
+  const spawnerInfoHtml = `<span class="spawner-info-btn" title="What is a Spawner?&#10;&#10;A Spawner is a named spot on the map where the game places animals, vehicles, or special objects when the map loads. I call them Spawners — in-game they&#39;re just regular location objects, but they&#39;re the ones that control where things appear at the start." tabindex="0"><i class="ph ph-info"></i></span>`;
   makeSection('Spawner', spawnChips, spawnerInfoHtml);
+
+  if (HME._refreshMissingHighlights) HME._refreshMissingHighlights();
 };

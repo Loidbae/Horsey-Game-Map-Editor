@@ -55,6 +55,7 @@ HME.doUndo = function() {
   op.undo();
   HME.state.redoStack.push(op);
   HME._syncUndoRedoButtons();
+  if (HME.state.mode === 'object') HME.updateObjectWarning();
 };
 
 HME.doRedo = function() {
@@ -63,6 +64,7 @@ HME.doRedo = function() {
   op.redo();
   HME.state.undoStack.push(op);
   HME._syncUndoRedoButtons();
+  if (HME.state.mode === 'object') HME.updateObjectWarning();
 };
 
 HME._syncUndoRedoButtons = function() {

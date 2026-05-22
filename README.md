@@ -24,21 +24,24 @@ An unofficial map editor for [Horsey Game](https://store.steampowered.com/app/36
 ### Terrain Painting
 Paint terrain tiles using the brush, fill, or pipette. The tile palette is categorised (Terraform, Flora, Roads, etc.) for quick access.
 
-![Terrain painting demo showing bridge and road placement](assets/Bridge.gif)
+![Terrain painting demo showing bridge and road placement](assets/island_painter.png)
+![Painted terrain ingame](assets/island.png)
 
 ---
 
 ### Inspect Mode — Moving Locations
 Click any placed location to select it. Drag to reposition.
 
-![Inspect mode showing location selection and drag-to-reposition](assets/locations.gif)
+![Inspect mode showing location selection and drag-to-reposition](assets/locations.png)
+![Showing Result ingame](assets/locations_ingame.png)
 
 ---
 
 ### Object Mode — Placing Spawners
 Switch to Object mode to place or remove location and spawner objects. Missing required locations are highlighted and flagged automatically.
 
-![Object mode showing spawner placement on the map](assets/spawner.gif)
+![Object mode showing spawner placement on the map](assets/spawner.png)
+![Showing spawner functioning ingame](assets/spawner_ingame.png)
 
 ---
 

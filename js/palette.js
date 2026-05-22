@@ -26,7 +26,7 @@ HME.buildInspectList = function() {
         </div>
         <div class="insp-view-btn">View&nbsp;&rarr;</div>`;
     } else {
-      row.innerHTML = `<div class="insp-dot-wrap"><div class="insp-dot" style="background:${HME.locColor(obj.gid)}"></div></div>
+      row.innerHTML = `<div class="insp-dot-wrap"><div class="insp-dot" style="background:#888888"></div></div>
         <div class="insp-info">
           <div class="insp-name">${obj.type}</div>
           <div class="insp-sub">${obj.gid} &middot; ${col},${rowCoord}</div>
@@ -101,7 +101,7 @@ HME.buildTerrainPal = function() {
         if (thumb) {
           chip.innerHTML = `<img src="${thumb}" class="tile-chip-img" alt=""><div class="tile-chip-name">${label}</div>`;
         } else {
-          chip.innerHTML = `<div class="tile-chip-swatch" style="background:${HME.tileColor(gid)}"></div><div class="tile-chip-name">${label}</div>`;
+          chip.innerHTML = `<div class="tile-chip-swatch" style="background:#404040"></div><div class="tile-chip-name">${label}</div>`;
         }
 
         chip.addEventListener('click', () => {
@@ -136,11 +136,10 @@ HME.buildTerrainPal = function() {
   grid.className = 'tile-cat-grid';
 
   uniq.forEach(gid => {
-    const name = HME.TILE_NAMES[gid] || `T${gid}`;
     const chip = document.createElement('div');
     chip.className   = 'tile-chip' + (gid === S.selTileGID ? ' sel' : '');
     chip.dataset.gid = gid;
-    chip.innerHTML   = `<div class="tile-chip-swatch" style="background:${HME.tileColor(gid)}"></div><div class="tile-chip-name">${name}</div>`;
+    chip.innerHTML   = `<div class="tile-chip-swatch" style="background:#404040"></div><div class="tile-chip-name">T${gid}</div>`;
     chip.addEventListener('click', () => {
       S.selTileGID = gid;
       document.querySelectorAll('.tile-chip').forEach(e => e.classList.remove('sel'));

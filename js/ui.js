@@ -130,7 +130,7 @@ HME.updateInspector = function(col, row) {
   const terrFirst = (HME.state.map.tilesets.find(ts => ts.source && ts.source.includes('terrain'))?.firstgid) || 1;
   const gid       = l.data[row * l.width + col];
   const sprite    = HME.terrainAtlas ? HME.terrainAtlas[gid - terrFirst] : null;
-  const name      = sprite ? sprite.name : (HME.TILE_NAMES[gid] || `Tile ${gid}`);
+  const name      = sprite ? sprite.name : `Tile ${gid}`;
 
   document.getElementById('i-tile').textContent  = name;
   document.getElementById('i-coord').textContent = `${col},${row}`;
@@ -141,7 +141,7 @@ HME.updatePaintInspector = function() {
   const S         = HME.state;
   const terrFirst = (S.map.tilesets.find(ts => ts.source && ts.source.includes('terrain'))?.firstgid) || 1;
   const sprite    = HME.terrainAtlas ? HME.terrainAtlas[S.selTileGID - terrFirst] : null;
-  const name      = sprite ? sprite.name : (HME.TILE_NAMES[S.selTileGID] || `Tile ${S.selTileGID}`);
+  const name      = sprite ? sprite.name : `Tile ${S.selTileGID}`;
 
   document.getElementById('i-tile').textContent = name;
   document.getElementById('i-gid').textContent  = S.selTileGID;

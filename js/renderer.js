@@ -27,7 +27,7 @@ HME._buildMinimapColorCache = function() {
         return;
       }
     }
-    cache[gid] = HME.hexToRgb(HME.tileColor(gid));
+    cache[gid] = { r: 64, g: 64, b: 64 };
   });
 
   return cache;
@@ -68,7 +68,7 @@ HME.buildMinimap = function() {
   HME.state.map.objects.forEach(o => {
     const tx = Math.floor(o.x / HME.TS);
     const ty = Math.floor(o.y / HME.TS) - 1;
-    const c  = HME.hexToRgb(HME.locColor(o.gid));
+    const c  = { r: 136, g: 136, b: 136 };
     for (let dy = -1; dy <= 1; dy++) {
       for (let dx = -1; dx <= 1; dx++) {
         const px = (ty + dy) * W + (tx + dx);
@@ -144,7 +144,7 @@ HME.render = function() {
       if (S.terrainImg && sprite) {
         ctx.drawImage(S.terrainImg, sprite.srcX, sprite.srcY, sprite.w, sprite.h, sx, sy, sw, sh);
       } else {
-        ctx.fillStyle = HME.tileColor(gid);
+        ctx.fillStyle = '#404040';
         ctx.fillRect(sx, sy, sw, sh);
       }
     }
@@ -190,7 +190,7 @@ HME.render = function() {
         const r = Math.max(3, Math.min(7, ts * 0.22));
         ctx.beginPath();
         ctx.arc(sx + ts / 2, sy + ts / 2, r, 0, Math.PI * 2);
-        ctx.fillStyle   = HME.locColor(obj.gid);
+        ctx.fillStyle   = '#888888';
         ctx.fill();
         ctx.strokeStyle = 'rgba(255,255,255,0.85)';
         ctx.lineWidth   = 1.5;
@@ -237,7 +237,7 @@ HME.render = function() {
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(S.locsImg, sprite.srcX, sprite.srcY, sprite.w, sprite.h, gsx, gsy, ts, ts);
     } else {
-      ctx.fillStyle = HME.locColor(obj.gid);
+      ctx.fillStyle = '#888888';
       ctx.fillRect(gsx, gsy, ts, ts);
     }
     ctx.globalAlpha = 1;
@@ -272,7 +272,7 @@ HME.render = function() {
             if (S.terrainImg && sprite) {
               ctx.drawImage(S.terrainImg, sprite.srcX, sprite.srcY, sprite.w, sprite.h, bsx, bsy, ts, ts);
             } else if (gid > 0) {
-              ctx.fillStyle = HME.tileColor(gid);
+              ctx.fillStyle = '#404040';
               ctx.fillRect(bsx, bsy, ts, ts);
             }
           }
@@ -307,7 +307,7 @@ HME.render = function() {
         if (S.terrainImg && sprite) {
           ctx.drawImage(S.terrainImg, sprite.srcX, sprite.srcY, sprite.w, sprite.h, gsx, gsy, ts, ts);
         } else if (gid > 0) {
-          ctx.fillStyle = HME.tileColor(gid);
+          ctx.fillStyle = '#404040';
           ctx.fillRect(gsx, gsy, ts, ts);
         }
         ctx.globalAlpha = 1;
@@ -329,7 +329,7 @@ HME.render = function() {
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(S.locsImg, sprite.srcX, sprite.srcY, sprite.w, sprite.h, gsx, gsy, ts, ts);
       } else {
-        ctx.fillStyle = HME.locColor(gid);
+        ctx.fillStyle = '#888888';
         ctx.fillRect(gsx, gsy, ts, ts);
       }
       ctx.globalAlpha = 1;

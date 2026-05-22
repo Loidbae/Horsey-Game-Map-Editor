@@ -66,7 +66,7 @@ HME.handleFiles = async function(fileList) {
   if (!found.locsPNG)                          missing.push('locs.png');
 
   if (missing.length) {
-    HME.setStatus(`⚠️ Found horsey.tmx — missing: ${missing.join(', ')}. Continuing with color fallback.`);
+    HME.setStatus(`⚠️ Found horsey.tmx — missing: ${missing.join(', ')}. Some features will be unavailable.`);
   } else {
     HME.setStatus('✅ All files found! Loading…', 'ok');
   }

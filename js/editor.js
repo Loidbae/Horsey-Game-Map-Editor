@@ -86,8 +86,11 @@ HME.nextObjId = function() {
   return HME.state.map.objects.reduce((m, o) => Math.max(m, o.id), 0) + 1;
 };
 
+HME.ENTITY_SPAWNER_GIDS = new Set([146, 147, 148, 149, 150]);
+
 HME.placeObj = function(col, row) {
   if (HME.objAt(col, row)) return;
+  const isEntity = HME.ENTITY_SPAWNER_GIDS.has(HME.state.selLocGID);
   const obj = {
     id:     HME.nextObjId(),
     type:   HME.state.selLocType,
@@ -96,7 +99,8 @@ HME.placeObj = function(col, row) {
     y:      (row + 1) * HME.TS,
     width:  HME.TS,
     height: HME.TS,
-    properties: {},
+    properties: isEntity ? { count: '10', radius: '5' } : {},
+    propMeta:   isEntity ? { count: 'int', radius: 'int' } : {},
   };
   HME.state.map.objects.push(obj);
   HME.state.redoStack = [];

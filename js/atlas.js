@@ -37,6 +37,55 @@ HME.SPAWNER_GIDS = {
   154: '???',
 };
 
+HME.SPAWNER_VARIANTS = {
+  146: [
+    { type: 'fest horse',  label: 'Fest Horse'  },
+    { type: 'crazy horse', label: 'Crazy Horse' },
+    { type: 'impala',      label: 'Impala'      },
+  ],
+};
+
+HME.SPAWNER_TYPES = {
+  145: 'truck',
+  147: 'tiger',
+  148: 'giraffe',
+  149: 'alligator',
+  150: 'moose',
+  153: 'vial world',
+  154: '',
+};
+
+HME.LOC_TYPES = {
+  97:  'home',
+  98:  'willaby',
+  99:  'circled',
+  100: 'bobs',
+  101: 'mabels',
+  102: 'surebreed',
+  103: 'hacienda',
+  104: 'paradise',
+  110: 'track',
+  111: 'paddock',
+  112: 'hermit',
+  113: 'crispr',
+  114: 'glue',
+  115: 'car lot',
+  117: 'supply',
+  118: 'ecologist',
+  119: 'hutch',
+  120: 'circus',
+  121: 'zoo',
+  122: 'acres',
+  123: 'saloon',
+  124: 'powerplant',
+  125: 'sweetie',
+  126: 'sumo',
+  127: 'junk',
+  128: 'biohackers',
+  133: 'club',
+  134: 'abandoned',
+};
+
 HME.parseAtlasXML = function(xml, numCols, imgW, imgH, tileW, tileH) {
   const doc = new DOMParser().parseFromString(xml, 'text/xml');
   const result = [];

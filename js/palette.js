@@ -162,14 +162,17 @@ HME.buildObjectPal = function() {
   const gidToType = {};
   S.map.objects.forEach(o => { if (o.type && o.type.trim()) gidToType[o.gid] = o.type.trim(); });
 
-  function makeChip(gid, label) {
+  function makeChip(gid, label, typeStr) {
+    const actualType = (typeStr !== undefined && typeStr !== null) ? typeStr : label;
     const localId = gid - locsFirst;
     const sprite  = (HME.locsAtlas && localId >= 0) ? HME.locsAtlas[localId] : null;
     const thumb   = HME.spriteThumbnail(S.locsImg, sprite, 28);
 
+    const isSel      = gid === S.selLocGID && actualType === S.selLocType;
     const chip       = document.createElement('div');
-    chip.className   = 'o-chip' + (gid === S.selLocGID ? ' sel' : '');
-    chip.dataset.gid = gid;
+    chip.className   = 'o-chip' + (isSel ? ' sel' : '');
+    chip.dataset.gid  = gid;
+    chip.dataset.type = actualType;
     chip.title       = `${label} (GID ${gid})`;
 
     if (thumb) {
@@ -180,7 +183,7 @@ HME.buildObjectPal = function() {
 
     chip.addEventListener('click', () => {
       S.selLocGID  = gid;
-      S.selLocType = label;
+      S.selLocType = actualType;
       document.querySelectorAll('.o-chip').forEach(e => e.classList.remove('sel'));
       chip.classList.add('sel');
     });
@@ -221,29 +224,40 @@ HME.buildObjectPal = function() {
       if (sprite.frame > 0) return;
       const gid = sprite.localId + locsFirst;
       if (HME.SPAWNER_GIDS[gid]) return;
-      const label = gidToType[gid] || sprite.name;
-      locChips.push(makeChip(gid, label));
+      const label    = sprite.name.replace(/^Loc/, '') || `GID ${gid}`;
+      const gameType = HME.LOC_TYPES[gid] || gidToType[gid] || sprite.name;
+      locChips.push(makeChip(gid, label, gameType));
     });
     const atlasGIDs = new Set(locChips.map(c => +c.dataset.gid));
     S.map.objects.forEach(o => {
       if (atlasGIDs.has(o.gid) || HME.SPAWNER_GIDS[o.gid]) return;
       atlasGIDs.add(o.gid);
-      locChips.push(makeChip(o.gid, gidToType[o.gid] || `GID ${o.gid}`));
+      const gameType = HME.LOC_TYPES[o.gid] || gidToType[o.gid] || `GID ${o.gid}`;
+      locChips.push(makeChip(o.gid, gidToType[o.gid] || `GID ${o.gid}`, gameType));
     });
   } else {
     const seen = new Set();
     S.map.objects.forEach(o => {
       if (seen.has(o.gid) || HME.SPAWNER_GIDS[o.gid]) return;
       seen.add(o.gid);
-      locChips.push(makeChip(o.gid, gidToType[o.gid] || `GID ${o.gid}`));
+      const gameType = HME.LOC_TYPES[o.gid] || gidToType[o.gid] || `GID ${o.gid}`;
+      locChips.push(makeChip(o.gid, gidToType[o.gid] || `GID ${o.gid}`, gameType));
     });
   }
   makeSection('Locations', locChips);
 
-  const spawnChips = Object.entries(HME.SPAWNER_GIDS).map(([gidStr, name]) => {
-    const gid   = +gidStr;
-    const label = gidToType[gid] || name;
-    return makeChip(gid, label);
+  const spawnChips = [];
+  Object.entries(HME.SPAWNER_GIDS).forEach(([gidStr, name]) => {
+    const gid      = +gidStr;
+    const variants = HME.SPAWNER_VARIANTS && HME.SPAWNER_VARIANTS[gid];
+    if (variants) {
+      variants.forEach(v => spawnChips.push(makeChip(gid, v.label, v.type)));
+    } else {
+      const gameType = HME.SPAWNER_TYPES && (HME.SPAWNER_TYPES[gid] !== undefined)
+        ? HME.SPAWNER_TYPES[gid]
+        : (gidToType[gid] || name);
+      spawnChips.push(makeChip(gid, name, gameType));
+    }
   });
 
   const spawnerInfoHtml = `<span class="spawner-info-btn" title="What is a Spawner?&#10;&#10;A Spawner is a named spot on the map where the game places animals, vehicles, or special objects when the map loads. I call them Spawners — in-game they&#39;re just regular location objects, but they&#39;re the ones that control where things appear at the start." tabindex="0"><i class="ph ph-info"></i></span>`;

@@ -43,18 +43,23 @@ HME.parseTMX = function(xml) {
 
   doc.querySelectorAll('objectgroup object').forEach(el => {
     const props = {};
+    const propMeta = {};
     el.querySelectorAll('property').forEach(p => {
-      props[p.getAttribute('name')] = p.getAttribute('value');
+      const name = p.getAttribute('name');
+      props[name] = p.getAttribute('value');
+      const t = p.getAttribute('type');
+      if (t) propMeta[name] = t;
     });
     HME.state.map.objects.push({
-      id:     +el.getAttribute('id'),
-      type:    el.getAttribute('type') || '',
-      gid:    +el.getAttribute('gid'),
-      x:      +el.getAttribute('x'),
-      y:      +el.getAttribute('y'),
-      width:  +(el.getAttribute('width')  || 32),
-      height: +(el.getAttribute('height') || 32),
+      id:       +el.getAttribute('id'),
+      type:      el.getAttribute('type') || '',
+      gid:      +el.getAttribute('gid'),
+      x:        +el.getAttribute('x'),
+      y:        +el.getAttribute('y'),
+      width:    +(el.getAttribute('width')  || 32),
+      height:   +(el.getAttribute('height') || 32),
       properties: props,
+      propMeta:   propMeta,
     });
   });
 };
@@ -72,16 +77,18 @@ HME.serializeTMX = function() {
   const objXML = m.objects.map(o => {
     const propKeys = Object.keys(o.properties);
     if (propKeys.length) {
-      const propsXML = propKeys.map(k =>
-        `    <property name="${k}" value="${o.properties[k]}"/>`
-      ).join('\n');
+      const propsXML = propKeys.map(k => {
+        const t = o.propMeta && o.propMeta[k];
+        const typeAttr = t ? ` type="${t}"` : '';
+        return `    <property name="${k}"${typeAttr} value="${o.properties[k]}"/>`;
+      }).join('\n');
       return `  <object id="${o.id}" type="${o.type}" gid="${o.gid}" x="${o.x}" y="${o.y}" width="${o.width}" height="${o.height}">\n   <properties>\n${propsXML}\n   </properties>\n  </object>`;
     }
     return `  <object id="${o.id}" type="${o.type}" gid="${o.gid}" x="${o.x}" y="${o.y}" width="${o.width}" height="${o.height}"/>`;
   }).join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<map version="${m.version}" tiledversion="${m.tiledversion}" orientation="${m.orientation}" renderorder="${m.renderorder}" width="${m.width}" height="${m.height}" tilewidth="${m.tilewidth}" tileheight="${m.tileheight}" infinite="${m.infinite}" nextlayerid="${m.nextlayerid}" nextobjectid="${m.nextobjectid}">
+<map version="${m.version}" tiledversion="${m.tiledversion}" orientation="${m.orientation}" renderorder="${m.renderorder}" width="${m.width}" height="${m.height}" tilewidth="${m.tilewidth}" tileheight="${m.tileheight}" infinite="${m.infinite}" nextlayerid="${m.nextlayerid}" nextobjectid="${m.objects.reduce((max, o) => Math.max(max, o.id), 0) + 1}">
  ${m.tilesets.map(ts => `<tileset firstgid="${ts.firstgid}" source="${ts.source}"/>`).join('\n ')}
  <layer id="${l.id}" name="${l.name}" width="${l.width}" height="${l.height}">
   <data encoding="csv">

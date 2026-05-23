@@ -105,7 +105,7 @@ HME._refreshMissingHighlights = function() {
     HME.state.selLocGID = primaryGID;
     const locsFirst = (HME.state.map.tilesets.find(ts => ts.source && ts.source.includes('locs'))?.firstgid) || 97;
     const sprite = HME.locsAtlas ? HME.locsAtlas[primaryGID - locsFirst] : null;
-    HME.state.selLocType = sprite ? sprite.name : `GID ${primaryGID}`;
+    HME.state.selLocType = primaryChip.dataset.type || (sprite ? sprite.name : `GID ${primaryGID}`);
   }
 };
 

@@ -74,7 +74,9 @@ HME.serializeTMX = function() {
     rows.push(slice.join(',') + (r < l.height - 1 ? ',' : ''));
   }
 
-  const objXML = m.objects.map(o => {
+  const objXML = m.objects.map((o, i) => {
+    const exportId   = i + 1;
+    const exportType = HME.LOC_TYPES[o.gid] ?? HME.SPAWNER_TYPES[o.gid] ?? o.type;
     const propKeys = Object.keys(o.properties);
     if (propKeys.length) {
       const propsXML = propKeys.map(k => {
@@ -82,13 +84,13 @@ HME.serializeTMX = function() {
         const typeAttr = t ? ` type="${t}"` : '';
         return `    <property name="${k}"${typeAttr} value="${o.properties[k]}"/>`;
       }).join('\n');
-      return `  <object id="${o.id}" type="${o.type}" gid="${o.gid}" x="${o.x}" y="${o.y}" width="${o.width}" height="${o.height}">\n   <properties>\n${propsXML}\n   </properties>\n  </object>`;
+      return `  <object id="${exportId}" type="${exportType}" gid="${o.gid}" x="${o.x}" y="${o.y}" width="${o.width}" height="${o.height}">\n   <properties>\n${propsXML}\n   </properties>\n  </object>`;
     }
-    return `  <object id="${o.id}" type="${o.type}" gid="${o.gid}" x="${o.x}" y="${o.y}" width="${o.width}" height="${o.height}"/>`;
+    return `  <object id="${exportId}" type="${exportType}" gid="${o.gid}" x="${o.x}" y="${o.y}" width="${o.width}" height="${o.height}"/>`;
   }).join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<map version="${m.version}" tiledversion="${m.tiledversion}" orientation="${m.orientation}" renderorder="${m.renderorder}" width="${m.width}" height="${m.height}" tilewidth="${m.tilewidth}" tileheight="${m.tileheight}" infinite="${m.infinite}" nextlayerid="${m.nextlayerid}" nextobjectid="${m.objects.reduce((max, o) => Math.max(max, o.id), 0) + 1}">
+<map version="${m.version}" tiledversion="${m.tiledversion}" orientation="${m.orientation}" renderorder="${m.renderorder}" width="${m.width}" height="${m.height}" tilewidth="${m.tilewidth}" tileheight="${m.tileheight}" infinite="${m.infinite}" nextlayerid="${m.nextlayerid}" nextobjectid="${m.objects.length + 1}">
  ${m.tilesets.map(ts => `<tileset firstgid="${ts.firstgid}" source="${ts.source}"/>`).join('\n ')}
  <layer id="${l.id}" name="${l.name}" width="${l.width}" height="${l.height}">
   <data encoding="csv">

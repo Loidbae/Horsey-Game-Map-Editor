@@ -6,13 +6,29 @@
 <title>Horsey Map Editor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
 <link rel="stylesheet" href="css/style.css">
+<script>
+  //ANTI-FLASH SCRIPT
+(function(){
+  var T={
+    dark:{'--bg':'#1a1a1a','--bg2':'#222222','--bg3':'#2c2c2c','--border':'rgba(255,255,255,0.09)','--border2':'rgba(255,255,255,0.18)','--text':'#e0e0e0','--text2':'#888888','--accent':'#378ADD','--accent2':'rgba(55,138,221,0.18)','--warn':'#c8a83a','--danger':'#cc4444','--success':'#44aa66','--item-bg':'#252525','--item-hover-bg':'#2a3245','--chip-bg':'#282828','--accent-text':'#60b8ff','--accent-text2':'#88ccff','--code-color':'#8ad0f0','--danger-text':'#f07070','--canvas-bg':'#08111a','--font-ui':"'Pixelify Sans',-apple-system,sans-serif",'--heading-color':'#888888','--accent-border-lo':'rgba(55,138,221,0.35)','--accent-border-hi':'rgba(55,138,221,0.45)','--accent-glow':'rgba(55,138,221,0.7)'},
+    light:{'--bg':'#f5f5f5','--bg2':'#ffffff','--bg3':'#eaeaea','--border':'rgba(0,0,0,0.09)','--border2':'rgba(0,0,0,0.18)','--text':'#1a1a1a','--text2':'#666666','--accent':'#2270cc','--accent2':'rgba(34,112,204,0.12)','--warn':'#a07800','--danger':'#cc2222','--success':'#1a8844','--item-bg':'#f0f0f0','--item-hover-bg':'#dae8f8','--chip-bg':'#ebebeb','--accent-text':'#1a60cc','--accent-text2':'#1050aa','--code-color':'#2060aa','--danger-text':'#cc2222','--canvas-bg':'#c8d8e8','--font-ui':"'Pixelify Sans',-apple-system,sans-serif",'--heading-color':'#666666','--accent-border-lo':'rgba(34,112,204,0.35)','--accent-border-hi':'rgba(34,112,204,0.45)','--accent-glow':'rgba(34,112,204,0.7)'},
+    hinamizawa:{'--bg':'#0d1117','--bg2':'#161b22','--bg3':'#1c2330','--border':'rgba(48,54,61,0.6)','--border2':'#30363d','--text':'#e6edf3','--text2':'#8b949e','--accent':'#f59e0b','--accent2':'rgba(251,191,36,0.12)','--warn':'#eab308','--danger':'#ef4444','--success':'#22c55e','--item-bg':'#131720','--item-hover-bg':'#1e2535','--chip-bg':'#131720','--accent-text':'#fbbf24','--accent-text2':'#fde68a','--code-color':'#fcd34d','--danger-text':'#f87171','--canvas-bg':'#060810','--font-ui':"'Rajdhani','Pixelify Sans',sans-serif",'--heading-color':'#fbbf24','--accent-border-lo':'rgba(245,158,11,0.4)','--accent-border-hi':'rgba(245,158,11,0.6)','--accent-glow':'rgba(251,191,36,0.7)'}
+  };
+  var KEY='hme_theme';var IKEY='hme_iframe_init';
+  function gc(n){var ca=document.cookie.split(';');for(var i=0;i<ca.length;i++){var c=ca[i].trim();if(c.indexOf(n+'=')==0)return c.substring(n.length+1);}return null;}
+  var id;try{id=sessionStorage.getItem(KEY);}catch(e){}
+  if(!id||!T[id])id=gc(KEY);
+  if(window!==window.parent){try{if((document.referrer||'').indexOf('hinamizawa.ai')>=0&&!gc(IKEY))id='hinamizawa';}catch(e){}}
+  if(!id||!T[id])id='dark';
+  var vars=T[id];var r=document.documentElement;
+  for(var k in vars)r.style.setProperty(k,vars[k]);
+})();
+</script>
 </head>
 <body>
-
-<!-- ═══ ACKNOWLEDGMENT OVERLAY (one-time) ═══ -->
 <div id="ack-overlay" class="modal-overlay">
   <div class="modal-card ack-card">
     <div class="ack-disclaimer-badge">⚠ NOT AN OFFICIAL TOOL — FAN MADE</div>
@@ -31,14 +47,11 @@
     <button id="ack-continue-btn" class="btn-primary" disabled onclick="HME.submitAcknowledgment()">I Understand — Continue</button>
   </div>
 </div>
-
-<!-- ═══════════════ SETUP SCREEN ═══════════════ -->
 <div id="setup-screen">
   <div class="setup-card">
     <div class="setup-logo">🐴</div>
     <div class="setup-title">Horsey Map Editor</div>
     <div class="setup-sub">Unofficial fan-made editor — load your game files to begin</div>
-
     <div class="info-box steam-paths-box">
       <strong>Where is your game folder?</strong>
       <div class="os-path-list">
@@ -56,33 +69,24 @@
         </div>
       </div>
     </div>
-
     <button class="btn-primary" onclick="document.getElementById('folder-input').click()">
       <i class="ph ph-folder-open"></i> Select Steam Game Folder
     </button>
     <input type="file" id="folder-input" webkitdirectory multiple>
-
     <button class="btn-secondary" onclick="document.getElementById('files-input').click()">
       <i class="ph ph-file-arrow-up"></i> Select Files Manually
     </button>
     <input type="file" id="files-input" multiple accept=".tmx,.tsx,.xml,.png,.json">
-
     <div class="file-hint">Needs: horsey.tmx · terrain.xml · locs.xml · terrain.png · locs.png</div>
     <div id="setup-status"></div>
   </div>
 </div>
-
-<!-- ═══════════════ EDITOR ═══════════════════════ -->
 <div id="editor">
-
-  <!-- Menubar -->
   <div class="menubar">
     <span class="menu-title">Horsey Map Editor</span>
     <div class="menu-sep"></div>
     <button class="menu-btn" onclick="HME.openNewFiles()"><i class="ph ph-folder-open"></i> Load</button>
     <button id="btn-download-map" class="menu-btn" onclick="HME.doSaveAs()"><i class="ph ph-download-simple"></i> Download Map</button>
-
-    <!-- Help split button -->
     <div class="menu-btn-group" id="help-btn-wrap">
       <button class="menu-btn help-btn" id="btn-help" onclick="HME.toggleHelpDropdown(event)">
         <i class="ph ph-question"></i> Help
@@ -93,14 +97,19 @@
         </div>
       </div>
     </div>
-
     <div class="menu-spacer"></div>
+    <div class="theme-picker">
+      <i class="ph ph-palette"></i>
+      <select id="theme-select" class="theme-select" onchange="HME.applyTheme(this.value)" title="Theme">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+        <option value="hinamizawa">Hinamizawa</option>
+      </select>
+    </div>
     <button class="menu-btn settings-btn" onclick="HME.openSettings()" title="Settings">
       <i class="ph ph-gear-six"></i> Settings
     </button>
   </div>
-
-  <!-- Toolbar -->
   <div class="toolbar">
     <button class="tool-btn active" id="btn-inspect" onclick="HME.setMode('inspect')">
       <i class="ph ph-cursor"></i> Inspect
@@ -147,49 +156,33 @@
       <i class="ph ph-arrow-clockwise"></i> Redo
     </button>
   </div>
-
-  <!-- Warning bar -->
   <div id="warn-bar">
     <i class="ph ph-warning" style="font-size:14px"></i>
     Missing required Locs objects — export is blocked until all required GIDs are placed.
   </div>
-
-  <!-- Body -->
   <div class="editor-body">
-
-    <!-- Left panel -->
     <div class="left-panel">
       <div class="panel-hdr" id="left-title">Objects</div>
       <div id="inspect-list"></div>
       <div id="terrain-pal"></div>
       <div id="object-pal"></div>
     </div>
-
-    <!-- Left resize handle -->
     <div class="resize-handle" id="left-resize" role="separator" aria-label="Resize left panel">
       <div class="resize-handle-dots"></div>
     </div>
-
-    <!-- Canvas -->
     <div class="canvas-wrap" id="canvas-wrap">
       <canvas id="map-canvas"></canvas>
     </div>
-
-    <!-- Right resize handle -->
     <div class="resize-handle" id="right-resize" role="separator" aria-label="Resize right panel">
       <div class="resize-handle-dots"></div>
     </div>
-
-    <!-- Right panel -->
     <div class="right-panel">
-
       <div class="r-section">
         <div class="r-title">Inspector</div>
         <div class="r-row"><span class="r-lbl">Tile</span><span class="r-val" id="i-tile">—</span></div>
         <div class="r-row"><span class="r-lbl">Coord</span><span class="r-val" id="i-coord">—</span></div>
         <div class="r-row"><span class="r-lbl">GID</span><span class="r-val" id="i-gid">—</span></div>
       </div>
-
       <div class="r-section" id="obj-inspector" style="display:none">
         <div class="r-title">Object</div>
         <div class="r-row"><span class="r-lbl">Type</span><span class="r-val" id="oi-type">—</span></div>
@@ -202,7 +195,6 @@
           </button>
         </div>
       </div>
-
       <div class="minimap-wrap">
         <div class="r-title">Overview</div>
         <div class="minimap-container">
@@ -210,18 +202,14 @@
           <canvas id="minimap-overlay"></canvas>
         </div>
       </div>
-
     </div>
   </div>
-
-  <!-- ═══ SETTINGS MODAL ══ -->
   <div id="settings-overlay" class="settings-overlay" onclick="if(event.target===this)HME.closeSettings()">
     <div class="settings-modal">
       <div class="settings-hdr">
         <span>Settings</span>
         <button class="settings-close" onclick="HME.closeSettings()"><i class="ph ph-x"></i></button>
       </div>
-
       <div class="settings-body">
         <div class="settings-section">
           <div class="settings-sec-title">Appearance</div>
@@ -237,7 +225,6 @@
             </div>
           </div>
         </div>
-
         <div class="settings-section">
           <div class="settings-sec-title">Keybinds <span style="font-size:14px;font-weight:400;color:var(--text2)">(click to rebind)</span></div>
           <div class="settings-row">
@@ -262,15 +249,12 @@
           </div>
         </div>
       </div>
-
       <div class="settings-footer">
         <button id="btn-reset-donotask" class="btn-secondary" style="padding:6px 14px;font-size:14px" onclick="HME.resetAllDoNotAsk()">Reset "Do not show again" choices</button>
         <button class="btn-secondary" style="padding:6px 14px;font-size:14px" onclick="HME.resetSettings()">Reset Defaults</button>
       </div>
     </div>
   </div>
-
-  <!-- ═══ BRUSH SIZE POPOVER ══ -->
   <div id="brush-size-popover" class="brush-size-popover">
     <div class="bsp-title">Brush</div>
     <div class="bsp-size-label">Size</div>
@@ -308,8 +292,6 @@
       </button>
     </div>
   </div>
-
-  <!-- ═══ NO ORIGINAL POPUP ══ -->
   <div id="no-original-modal" class="modal-overlay modal-overlay-sm">
     <div class="modal-card">
       <div class="modal-title">No Saved Starting Point</div>
@@ -328,8 +310,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ═══ RESTORE CONFIRM POPUP ══ -->
   <div id="restore-confirm-modal" class="modal-overlay modal-overlay-sm">
     <div class="modal-card">
       <div class="modal-title">Are You Sure?</div>
@@ -347,8 +327,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ═══ INSTALL MAP MODAL ══ -->
   <div id="install-map-modal" class="modal-overlay">
     <div class="modal-card install-card">
       <div class="modal-title-row">
@@ -357,12 +335,10 @@
       </div>
       <div class="modal-body install-body">
         <p class="install-intro">Downloading the map does <strong>not</strong> automatically update your game. You must copy the file into your game folder yourself.</p>
-
         <div class="install-warning-box">
           <i class="ph ph-warning"></i>
           <span><strong>You must start a brand new save file</strong> to see your map changes in-game. Loading an existing save will <strong>not</strong> reflect the new map.</span>
         </div>
-
         <div class="install-section" data-os="win">
           <div class="install-os-row">
             <span class="os-badge win-badge"><i class="ph ph-windows-logo"></i> Windows</span>
@@ -375,7 +351,6 @@
             <li>Start the game and enjoy your changes.</li>
           </ol>
         </div>
-
         <div class="install-section" data-os="mac">
           <div class="install-os-row">
             <span class="os-badge mac-badge"><i class="ph ph-apple-logo"></i> macOS</span>
@@ -390,7 +365,6 @@
             <li>Start the game and enjoy your changes.</li>
           </ol>
         </div>
-
         <div class="install-section" data-os="linux">
           <div class="install-os-row">
             <span class="os-badge linux-badge"><i class="ph ph-linux-logo"></i> Linux</span>
@@ -414,8 +388,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Statusbar -->
   <div class="statusbar">
     <span>Cursor: <span id="st-coord">—</span></span>
     <span class="st-sep">|</span>
@@ -430,10 +402,7 @@
     <span id="st-file">horsey.tmx</span>
     <span id="st-mod" class="mod-dot" style="display:none"> ●</span>
   </div>
-
 </div>
-
-<!-- ═══════════════ MODULES ══════════════════════ -->
 <script src="js/state.js"></script>
 <script src="js/atlas.js"></script>
 <script src="js/tmx.js"></script>
@@ -443,6 +412,6 @@
 <script src="js/editor.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>
-
+<script src="js/themes.js"></script>
 </body>
 </html>

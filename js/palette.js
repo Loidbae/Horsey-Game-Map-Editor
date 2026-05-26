@@ -70,7 +70,7 @@ HME.buildTerrainPal = function() {
           break;
         }
       }
-      if (!placed) buckets['Misc'].push({ sprite, gid });
+      if (!placed && !HME.TILE_EXCLUDED.has(sprite.name)) buckets['Misc'].push({ sprite, gid });
     });
 
     HME.TILE_CATEGORY_ORDER.forEach(cat => {
@@ -82,7 +82,17 @@ HME.buildTerrainPal = function() {
 
       const hdr = document.createElement('div');
       hdr.className   = 'cat-hdr';
-      hdr.textContent = cat;
+      if (cat === 'Misc') {
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = cat;
+        hdr.appendChild(titleSpan);
+        const infoWrap = document.createElement('span');
+        infoWrap.className = 'spawner-info-wrap';
+        infoWrap.innerHTML = `<span class="spawner-info-btn" title="These tiles exist in the game&#39;s terrain atlas but their in-game purpose is currently unknown. They may be decorative, unused, or serve a function that hasn&#39;t been documented yet." tabindex="0"><i class="ph ph-info"></i></span>`;
+        hdr.appendChild(infoWrap);
+      } else {
+        hdr.textContent = cat;
+      }
       section.appendChild(hdr);
 
       const grid = document.createElement('div');
@@ -224,39 +234,53 @@ HME.buildObjectPal = function() {
       if (sprite.frame > 0) return;
       const gid = sprite.localId + locsFirst;
       if (HME.SPAWNER_GIDS[gid]) return;
-      const label    = sprite.name.replace(/^Loc/, '') || `GID ${gid}`;
-      const gameType = HME.LOC_TYPES[gid] || gidToType[gid] || sprite.name;
-      locChips.push(makeChip(gid, label, gameType));
+      const locName = HME.LOC_TYPES[gid];
+      if (!locName) return;
+      locChips.push(makeChip(gid, locName, locName));
     });
     const atlasGIDs = new Set(locChips.map(c => +c.dataset.gid));
-    S.map.objects.forEach(o => {
-      if (atlasGIDs.has(o.gid) || HME.SPAWNER_GIDS[o.gid]) return;
-      atlasGIDs.add(o.gid);
-      const gameType = HME.LOC_TYPES[o.gid] || gidToType[o.gid] || `GID ${o.gid}`;
-      locChips.push(makeChip(o.gid, gidToType[o.gid] || `GID ${o.gid}`, gameType));
+    Object.entries(HME.LOC_TYPES).forEach(([gidStr, name]) => {
+      const gid = +gidStr;
+      if (atlasGIDs.has(gid)) return;
+      locChips.push(makeChip(gid, name, name));
     });
   } else {
-    const seen = new Set();
-    S.map.objects.forEach(o => {
-      if (seen.has(o.gid) || HME.SPAWNER_GIDS[o.gid]) return;
-      seen.add(o.gid);
-      const gameType = HME.LOC_TYPES[o.gid] || gidToType[o.gid] || `GID ${o.gid}`;
-      locChips.push(makeChip(o.gid, gidToType[o.gid] || `GID ${o.gid}`, gameType));
+    Object.entries(HME.LOC_TYPES).forEach(([gidStr, name]) => {
+      locChips.push(makeChip(+gidStr, name, name));
     });
   }
-  makeSection('Locations', locChips);
+  const placedByGID = {};
+  S.map.objects.forEach(o => { if (!HME.SPAWNER_GIDS[o.gid]) placedByGID[o.gid] = o; });
+
+  locChips.forEach(chip => {
+    const gid = +chip.dataset.gid;
+    const placedObj = placedByGID[gid];
+    if (!placedObj) return;
+    chip.classList.add('o-chip-placed');
+    const overlay = document.createElement('div');
+    overlay.className = 'o-chip-placed-overlay';
+    overlay.innerHTML = '<i class="ph ph-trash"></i>';
+    chip.appendChild(overlay);
+    overlay.addEventListener('click', e => {
+      e.stopPropagation();
+      HME.removeObj(placedObj);
+    });
+  });
+
+  const locInfoHtml = `<span class="spawner-info-btn" title="Only one instance of each location can exist on the map.&#10;&#10;Locations with a trash icon are already placed. Click them to remove the location from the map first — then you can place it somewhere new." tabindex="0"><i class="ph ph-info"></i></span>`;
+  makeSection('Locations', locChips, locInfoHtml);
 
   const spawnChips = [];
   Object.entries(HME.SPAWNER_GIDS).forEach(([gidStr, name]) => {
     const gid      = +gidStr;
     const variants = HME.SPAWNER_VARIANTS && HME.SPAWNER_VARIANTS[gid];
     if (variants) {
-      variants.forEach(v => spawnChips.push(makeChip(gid, v.label, v.type)));
+      variants.forEach(v => spawnChips.push(makeChip(gid, v.type, v.type)));
     } else {
       const gameType = HME.SPAWNER_TYPES && (HME.SPAWNER_TYPES[gid] !== undefined)
         ? HME.SPAWNER_TYPES[gid]
         : (gidToType[gid] || name);
-      spawnChips.push(makeChip(gid, name, gameType));
+      spawnChips.push(makeChip(gid, gameType, gameType));
     }
   });
 

@@ -2,7 +2,7 @@
 
 HME.TILE_CATEGORIES = {
   'Terraform': [
-    'Plain', 'GrassLand', 'BogLand', 'PalmLand', 'CactusLand', 'NGrassLand',
+    'Plain', 'GrassLand', 'BogLand', 'NGrassLand',
     'Water', 'Pond', 'BadLand',
     'Grass', 'Reeds', 'NGrass',
   ],
@@ -12,7 +12,7 @@ HME.TILE_CATEGORIES = {
     'Acacia', 'Apple', 'Palm', 'Cactus',
   ],
   'Big Rocks': [
-    'Mountain', 'Boulder', 'Pebbles', 'Cave','Un1', 'Un2'
+    'Mountain', 'Boulder', 'Pebbles', 'Cave', 'Un1'
   ],
   'Roads': [
     'Road', 'Road8', 'DirtRoad', 'DirtRoad8',
@@ -52,7 +52,7 @@ HME.SPAWNER_TYPES = {
   149: 'alligator',
   150: 'moose',
   153: 'vial world',
-  154: '',
+  154: '???',
 };
 
 HME.LOC_TYPES = {
@@ -85,6 +85,8 @@ HME.LOC_TYPES = {
   133: 'club',
   134: 'abandoned',
 };
+
+HME.TILE_EXCLUDED = new Set([]);
 
 HME.parseAtlasXML = function(xml, numCols, imgW, imgH, tileW, tileH) {
   const doc = new DOMParser().parseFromString(xml, 'text/xml');

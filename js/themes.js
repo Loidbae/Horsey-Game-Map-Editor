@@ -29,6 +29,7 @@ HME.THEMES = {
             '--accent-border-lo': 'rgba(55,138,221,0.35)',
             '--accent-border-hi': 'rgba(55,138,221,0.45)',
             '--accent-glow':      'rgba(55,138,221,0.7)',
+            '--tool-btn-arrow-pad': '6.5px 10px',
         }
     },
     light: {
@@ -41,24 +42,25 @@ HME.THEMES = {
             '--border2':          'rgba(0,0,0,0.18)',
             '--text':             '#1a1a1a',
             '--text2':            '#666666',
-            '--accent':           '#2270cc',
-            '--accent2':          'rgba(34,112,204,0.12)',
+            '--accent':           '#cc2222',
+            '--accent2':          'rgba(204,34,34,0.12)',
             '--warn':             '#a07800',
             '--danger':           '#cc2222',
             '--success':          '#1a8844',
             '--item-bg':          '#f0f0f0',
-            '--item-hover-bg':    '#dae8f8',
+            '--item-hover-bg':    '#f8dada',
             '--chip-bg':          '#ebebeb',
-            '--accent-text':      '#1a60cc',
-            '--accent-text2':     '#1050aa',
-            '--code-color':       '#2060aa',
+            '--accent-text':      '#aa1a1a',
+            '--accent-text2':     '#881010',
+            '--code-color':       '#aa2020',
             '--danger-text':      '#cc2222',
             '--canvas-bg':        '#c8d8e8',
             '--font-ui':          "'Pixelify Sans', -apple-system, sans-serif",
             '--heading-color':    '#666666',
-            '--accent-border-lo': 'rgba(34,112,204,0.35)',
-            '--accent-border-hi': 'rgba(34,112,204,0.45)',
-            '--accent-glow':      'rgba(34,112,204,0.7)',
+            '--accent-border-lo': 'rgba(204,34,34,0.35)',
+            '--accent-border-hi': 'rgba(204,34,34,0.45)',
+            '--accent-glow':      'rgba(204,34,34,0.7)',
+            '--tool-btn-arrow-pad': '6.5px 10px',
         }
     },
     hinamizawa: {
@@ -89,6 +91,7 @@ HME.THEMES = {
             '--accent-border-lo': 'rgba(245,158,11,0.4)',
             '--accent-border-hi': 'rgba(245,158,11,0.6)',
             '--accent-glow':      'rgba(251,191,36,0.7)',
+            '--tool-btn-arrow-pad': '7.5px 10px',
         }
     },
 };
@@ -142,6 +145,8 @@ HME.applyTheme = function(id) {
     HME._setThemeCookie(id, 30);
     const sel = document.getElementById('theme-select');
     if (sel) sel.value = id;
+    const sel2 = document.getElementById('setup-theme-select');
+    if (sel2) sel2.value = id;
 };
 
 HME._detectIframeTheme = function() {

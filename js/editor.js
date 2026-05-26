@@ -89,6 +89,7 @@ HME.nextObjId = function() {
 HME.ENTITY_SPAWNER_GIDS = new Set([146, 147, 148, 149, 150]);
 
 HME.placeObj = function(col, row) {
+  if (!HME.state.selLocGID) return;
   if (HME.objAt(col, row)) return;
   const isEntity = HME.ENTITY_SPAWNER_GIDS.has(HME.state.selLocGID);
   const obj = {
@@ -112,11 +113,12 @@ HME.placeObj = function(col, row) {
         HME.state.selObj = null;
         document.getElementById('obj-inspector').style.display = 'none';
       }
-      HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.render();
+      HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.buildObjectPal(); HME.render();
     },
     redo() {
       HME.state.map.objects.push(obj);
-      HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.render();
+      HME.state.selLocGID = null; HME.state.selLocType = null;
+      HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.buildObjectPal(); HME.render();
     },
   });
   if (HME.state.undoStack.length > 80) HME.state.undoStack.shift();
@@ -125,6 +127,10 @@ HME.placeObj = function(col, row) {
   HME.updateStats();
   HME.buildMinimap();
   HME.buildInspectList();
+  HME.state.selLocGID  = null;
+  HME.state.selLocType = null;
+  HME.updateObjectWarning();
+  HME.buildObjectPal();
   HME._syncUndoRedoButtons();
   HME.render();
 };
@@ -141,7 +147,7 @@ HME.removeObj = function(obj) {
   HME.state.undoStack.push({
     undo() {
       HME.state.map.objects.splice(i, 0, obj);
-      HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.render();
+      HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.buildObjectPal(); HME.render();
     },
     redo() {
       const idx = HME.state.map.objects.indexOf(obj);
@@ -150,7 +156,7 @@ HME.removeObj = function(obj) {
         HME.state.selObj = null;
         document.getElementById('obj-inspector').style.display = 'none';
       }
-      HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.render();
+      HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.buildObjectPal(); HME.render();
     },
   });
   if (HME.state.undoStack.length > 80) HME.state.undoStack.shift();
@@ -158,6 +164,7 @@ HME.removeObj = function(obj) {
   HME.updateStats();
   HME.buildMinimap();
   HME.buildInspectList();
+  HME.buildObjectPal();
   HME._syncUndoRedoButtons();
   HME.render();
 };

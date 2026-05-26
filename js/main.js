@@ -44,6 +44,9 @@ HME.initEditor = function() {
   }
 
   HME.render();
+  if (!HME.settings.doNotAsk.patchnotes) {
+    setTimeout(() => HME.showPatchnotesModal(), 150);
+  }
 };
 
 HME.setupCanvasEvents = function() {

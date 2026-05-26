@@ -61,9 +61,11 @@ HME.updateObjectWarning = function() {
     const gidToType  = {};
     HME.state.map.objects.forEach(o => { if (o.type && o.type.trim()) gidToType[o.gid] = o.type.trim(); });
     const names = HME._missingLocQueue.map(g => {
+      const locName = HME.LOC_TYPES[g] || HME.SPAWNER_TYPES[g];
+      if (locName) return locName;
       const sprite = HME.locsAtlas ? HME.locsAtlas[g - locsFirst] : null;
       const raw = gidToType[g] || (sprite ? sprite.name : `GID ${g}`);
-      return raw.replace(/^[Ll]oc/, '');
+      return raw.replace(/^[Ll]oc/i, '');
     }).join(', ');
     warnBar.innerHTML = `<i class="ph ph-warning" style="font-size:14px"></i> Missing locations: <strong>${names}</strong>`;
     warnBar.classList.add('show');
@@ -105,7 +107,7 @@ HME._refreshMissingHighlights = function() {
     HME.state.selLocGID = primaryGID;
     const locsFirst = (HME.state.map.tilesets.find(ts => ts.source && ts.source.includes('locs'))?.firstgid) || 97;
     const sprite = HME.locsAtlas ? HME.locsAtlas[primaryGID - locsFirst] : null;
-    HME.state.selLocType = primaryChip.dataset.type || (sprite ? sprite.name : `GID ${primaryGID}`);
+    HME.state.selLocType = primaryChip.dataset.type || HME.LOC_TYPES[primaryGID] || HME.SPAWNER_TYPES[primaryGID] || (sprite ? sprite.name : `GID ${primaryGID}`);
   }
 };
 
@@ -322,6 +324,37 @@ HME.resetSettings = function() {
   HME.saveSettings();
   HME.openSettings();
   HME.render();
+};
+
+HME.showPatchnotesModal = function() {
+  const body = document.getElementById('patchnotes-body');
+  if (body && HME.PATCHNOTES) {
+    body.innerHTML = HME.PATCHNOTES.map(entry => `
+      <div class="patchnotes-entry">
+        <div class="patchnotes-version">${entry.version} — ${entry.title}</div>
+        <hr class="patchnotes-hr">
+        ${entry.sections.map(s => `
+          <div class="patchnotes-section">
+            <div class="patchnotes-heading">${s.heading}</div>
+            <div class="patchnotes-desc">${s.description}</div>
+            ${s.points.map(p => `<div class="patchnotes-point">- ${p}</div>`).join('')}
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  }
+  const dnaCheck = document.getElementById('patchnotes-dna-check');
+  if (dnaCheck) dnaCheck.checked = false;
+  document.getElementById('patchnotes-modal').classList.add('open');
+};
+
+HME.closePatchnotesModal = function() {
+  const dnaCheck = document.getElementById('patchnotes-dna-check');
+  if (dnaCheck && dnaCheck.checked) {
+    HME.settings.doNotAsk.patchnotes = true;
+    HME.saveSettings();
+  }
+  document.getElementById('patchnotes-modal').classList.remove('open');
 };
 
 HME.resetAllDoNotAsk = function() {

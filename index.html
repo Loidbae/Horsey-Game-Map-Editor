@@ -14,7 +14,7 @@
 (function(){
   var T={
     dark:{'--bg':'#1a1a1a','--bg2':'#222222','--bg3':'#2c2c2c','--border':'rgba(255,255,255,0.09)','--border2':'rgba(255,255,255,0.18)','--text':'#e0e0e0','--text2':'#888888','--accent':'#378ADD','--accent2':'rgba(55,138,221,0.18)','--warn':'#c8a83a','--danger':'#cc4444','--success':'#44aa66','--item-bg':'#252525','--item-hover-bg':'#2a3245','--chip-bg':'#282828','--accent-text':'#60b8ff','--accent-text2':'#88ccff','--code-color':'#8ad0f0','--danger-text':'#f07070','--canvas-bg':'#08111a','--font-ui':"'Pixelify Sans',-apple-system,sans-serif",'--heading-color':'#888888','--accent-border-lo':'rgba(55,138,221,0.35)','--accent-border-hi':'rgba(55,138,221,0.45)','--accent-glow':'rgba(55,138,221,0.7)'},
-    light:{'--bg':'#f5f5f5','--bg2':'#ffffff','--bg3':'#eaeaea','--border':'rgba(0,0,0,0.09)','--border2':'rgba(0,0,0,0.18)','--text':'#1a1a1a','--text2':'#666666','--accent':'#2270cc','--accent2':'rgba(34,112,204,0.12)','--warn':'#a07800','--danger':'#cc2222','--success':'#1a8844','--item-bg':'#f0f0f0','--item-hover-bg':'#dae8f8','--chip-bg':'#ebebeb','--accent-text':'#1a60cc','--accent-text2':'#1050aa','--code-color':'#2060aa','--danger-text':'#cc2222','--canvas-bg':'#c8d8e8','--font-ui':"'Pixelify Sans',-apple-system,sans-serif",'--heading-color':'#666666','--accent-border-lo':'rgba(34,112,204,0.35)','--accent-border-hi':'rgba(34,112,204,0.45)','--accent-glow':'rgba(34,112,204,0.7)'},
+    light:{'--bg':'#f5f5f5','--bg2':'#ffffff','--bg3':'#eaeaea','--border':'rgba(0,0,0,0.09)','--border2':'rgba(0,0,0,0.18)','--text':'#1a1a1a','--text2':'#666666','--accent':'#cc2222','--accent2':'rgba(204,34,34,0.12)','--warn':'#a07800','--danger':'#cc2222','--success':'#1a8844','--item-bg':'#f0f0f0','--item-hover-bg':'#f8dada','--chip-bg':'#ebebeb','--accent-text':'#aa1a1a','--accent-text2':'#881010','--code-color':'#aa2020','--danger-text':'#cc2222','--canvas-bg':'#c8d8e8','--font-ui':"'Pixelify Sans',-apple-system,sans-serif",'--heading-color':'#666666','--accent-border-lo':'rgba(204,34,34,0.35)','--accent-border-hi':'rgba(204,34,34,0.45)','--accent-glow':'rgba(204,34,34,0.7)'},
     hinamizawa:{'--bg':'#0d1117','--bg2':'#161b22','--bg3':'#1c2330','--border':'rgba(48,54,61,0.6)','--border2':'#30363d','--text':'#e6edf3','--text2':'#8b949e','--accent':'#f59e0b','--accent2':'rgba(251,191,36,0.12)','--warn':'#eab308','--danger':'#ef4444','--success':'#22c55e','--item-bg':'#131720','--item-hover-bg':'#1e2535','--chip-bg':'#131720','--accent-text':'#fbbf24','--accent-text2':'#fde68a','--code-color':'#fcd34d','--danger-text':'#f87171','--canvas-bg':'#060810','--font-ui':"'Rajdhani','Pixelify Sans',sans-serif",'--heading-color':'#fbbf24','--accent-border-lo':'rgba(245,158,11,0.4)','--accent-border-hi':'rgba(245,158,11,0.6)','--accent-glow':'rgba(251,191,36,0.7)'}
   };
   var KEY='hme_theme';var IKEY='hme_iframe_init';
@@ -80,6 +80,14 @@
     <div class="file-hint">Needs: horsey.tmx · terrain.xml · locs.xml · terrain.png · locs.png</div>
     <div id="setup-status"></div>
   </div>
+  <div class="setup-theme-row">
+    <i class="ph ph-palette"></i>
+    <select id="setup-theme-select" class="theme-select" onchange="HME.applyTheme(this.value)">
+      <option value="dark">Dark</option>
+      <option value="light">Light</option>
+      <option value="hinamizawa">Hinamizawa</option>
+    </select>
+  </div>
 </div>
 <div id="editor">
   <div class="menubar">
@@ -87,6 +95,7 @@
     <div class="menu-sep"></div>
     <button class="menu-btn" onclick="HME.openNewFiles()"><i class="ph ph-folder-open"></i> Load</button>
     <button id="btn-download-map" class="menu-btn" onclick="HME.doSaveAs()"><i class="ph ph-download-simple"></i> Download Map</button>
+    <button class="menu-btn" onclick="HME.showPatchnotesModal()"><i class="ph ph-newspaper"></i> Patch Notes</button>
     <div class="menu-btn-group" id="help-btn-wrap">
       <button class="menu-btn help-btn" id="btn-help" onclick="HME.toggleHelpDropdown(event)">
         <i class="ph ph-question"></i> Help
@@ -116,14 +125,14 @@
     </button>
     <div class="tool-btn-group" id="btn-paint-wrap">
       <button class="tool-btn tool-btn-main" id="btn-paint" onclick="HME.setMode('paint')">
-        <i class="ph ph-paintbrush" id="paint-tool-icon"></i> <span id="paint-tool-label">Paint</span>
+        <i class="ph ph-paint-brush" id="paint-tool-icon"></i> <span id="paint-tool-label">Paint</span>
       </button>
       <button class="tool-btn tool-btn-arrow" onclick="HME.togglePaintDropdown(event)" title="Paint sub-tools">
         <i class="ph ph-caret-down" style="font-size:14px"></i>
       </button>
       <div class="tool-dropdown" id="paint-dropdown">
         <div class="tool-dd-item active" data-tool="brush" onclick="HME.setPaintTool('brush');HME.setMode('paint');HME.closePaintDropdown()">
-          <span><i class="ph ph-paintbrush"></i> Brush</span><span class="dd-key" id="kb-brush">B</span>
+          <span><i class="ph ph-paint-brush"></i> Brush</span><span class="dd-key" id="kb-brush">B</span>
         </div>
         <div class="tool-dd-item" data-tool="pipette" onclick="HME.setPaintTool('pipette');HME.setMode('paint');HME.closePaintDropdown()">
           <span><i class="ph ph-eyedropper"></i> Pipette</span><span class="dd-key" id="kb-pipette">P</span>
@@ -345,7 +354,7 @@
           </div>
           <ol class="install-steps">
             <li>Download <code>horsey.tmx</code> using the button below.</li>
-            <li>Open your Steam game folder:<br><code>C:\Program Files (x86)\Steam\steamapps\common\Horsey Game\Resources</code></li>
+            <li>Open your Steam game folder:<br><code>C:\Program Files (x86)\Steam\steamapps\common\Horsey Game\data</code></li>
             <li>Back up your existing <code>horsey.tmx</code> before continuing — rename it to <code>horsey.tmx.bak</code> or copy it somewhere safe.</li>
             <li>Replace the existing <code>horsey.tmx</code> with the one you downloaded.</li>
             <li>Start the game and enjoy your changes.</li>
@@ -388,6 +397,21 @@
       </div>
     </div>
   </div>
+  <div id="patchnotes-modal" class="modal-overlay">
+    <div class="modal-card install-card">
+      <div class="modal-title-row">
+        <div class="modal-title-big">Patch Notes</div>
+        <button class="modal-close-btn" onclick="HME.closePatchnotesModal()"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="modal-body install-body" id="patchnotes-body" style="max-height:420px;overflow-y:auto"></div>
+      <div class="modal-dna-row">
+        <input type="checkbox" id="patchnotes-dna-check"> <label for="patchnotes-dna-check">Don't show this again on startup</label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="HME.closePatchnotesModal()">Got it</button>
+      </div>
+    </div>
+  </div>
   <div class="statusbar">
     <span>Cursor: <span id="st-coord">—</span></span>
     <span class="st-sep">|</span>
@@ -412,6 +436,7 @@
 <script src="js/editor.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>
+<script src="js/patchnotes.js"></script>
 <script src="js/themes.js"></script>
 </body>
 </html>

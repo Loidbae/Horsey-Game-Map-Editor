@@ -93,6 +93,7 @@ HME.defaultSettings = function() {
     doNotAsk: {
       restoreOriginal: false,
       downloadInstructions: false,
+      patchnotes: false,
     },
     keybinds: {
       modeInspect:  'v',

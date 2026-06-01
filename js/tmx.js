@@ -71,7 +71,7 @@ HME.serializeTMX = function() {
   const rows = [];
   for (let r = 0; r < l.height; r++) {
     const slice = l.data.slice(r * l.width, r * l.width + l.width);
-    rows.push(slice.join(',') + (r < l.height - 1 ? ',' : ''));
+    rows.push(slice.map(HME.TILE_GID_REMAP).join(',') + (r < l.height - 1 ? ',' : ''));
   }
 
   const objXML = m.objects.map((o, i) => {
@@ -82,7 +82,9 @@ HME.serializeTMX = function() {
       const propsXML = propKeys.map(k => {
         const t = o.propMeta && o.propMeta[k];
         const typeAttr = t ? ` type="${t}"` : '';
-        return `    <property name="${k}"${typeAttr} value="${o.properties[k]}"/>`;
+        let val = o.properties[k];
+        if (k === 'buried' && (val === '' || val === null || val === undefined)) val = '0';
+        return `    <property name="${k}"${typeAttr} value="${val}"/>`;
       }).join('\n');
       return `  <object id="${exportId}" type="${exportType}" gid="${o.gid}" x="${o.x}" y="${o.y}" width="${o.width}" height="${o.height}">\n   <properties>\n${propsXML}\n   </properties>\n  </object>`;
     }

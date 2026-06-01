@@ -7,9 +7,23 @@ HME.buildInspectList = function() {
   const locsFirst = (S.map.tilesets.find(ts => ts.source && ts.source.includes('locs'))?.firstgid) || 97;
 
   S.map.objects.forEach(obj => {
-    const localId = obj.gid - locsFirst;
-    const sprite  = (HME.locsAtlas && localId >= 0) ? HME.locsAtlas[localId] : null;
-    const thumb   = HME.spriteThumbnail(S.locsImg, sprite, 32);
+    const localId    = obj.gid - locsFirst;
+    const sprite     = (HME.locsAtlas && localId >= 0) ? HME.locsAtlas[localId] : null;
+    const isBuried   = obj.gid === 154;
+    const buriedId   = isBuried ? parseInt(obj.properties?.buried) : NaN;
+    const buriedItem = (!isNaN(buriedId) && HME.BURIED_ITEMS) ? HME.BURIED_ITEMS[buriedId] : null;
+    let thumb = HME.spriteThumbnail(S.locsImg, sprite, 32);
+    if (isBuried && buriedItem && S.spritesImg) {
+      const c = document.createElement('canvas'); c.width = 32; c.height = 32;
+      const cx = c.getContext('2d'); cx.imageSmoothingEnabled = false;
+      const scale = Math.min(32 / buriedItem.sw, 32 / buriedItem.sh);
+      const dx = Math.floor((32 - buriedItem.sw * scale) / 2);
+      const dy = Math.floor((32 - buriedItem.sh * scale) / 2);
+      cx.drawImage(S.spritesImg, buriedItem.sx, buriedItem.sy, buriedItem.sw, buriedItem.sh, dx, dy, buriedItem.sw * scale, buriedItem.sh * scale);
+      cx.drawImage(S.spritesImg, 7, 92, 8, 14, 0, 0, 8, 14);
+      thumb = c.toDataURL();
+    }
+    const displayName = (isBuried && buriedItem) ? buriedItem.name : obj.type;
 
     const col      = Math.floor(obj.x / HME.TS);
     const rowCoord = Math.floor(obj.y / HME.TS) - 1;
@@ -21,14 +35,14 @@ HME.buildInspectList = function() {
     if (thumb) {
       row.innerHTML = `<img src="${thumb}" class="insp-thumb" alt="">
         <div class="insp-info">
-          <div class="insp-name">${obj.type}</div>
+          <div class="insp-name">${displayName}</div>
           <div class="insp-sub">${obj.gid} &middot; ${col},${rowCoord}</div>
         </div>
         <div class="insp-view-btn">View&nbsp;&rarr;</div>`;
     } else {
       row.innerHTML = `<div class="insp-dot-wrap"><div class="insp-dot" style="background:#888888"></div></div>
         <div class="insp-info">
-          <div class="insp-name">${obj.type}</div>
+          <div class="insp-name">${displayName}</div>
           <div class="insp-sub">${obj.gid} &middot; ${col},${rowCoord}</div>
         </div>
         <div class="insp-view-btn">View&nbsp;&rarr;</div>`;
@@ -62,6 +76,7 @@ HME.buildTerrainPal = function() {
     HME.terrainAtlas.forEach(sprite => {
       if (!sprite) return;
       const gid = sprite.localId + terrFirst;
+      if (HME.TILE_HIDDEN_GIDS.some(r => gid >= r.min && gid <= r.max)) return;
       let placed = false;
       for (const [cat, names] of Object.entries(HME.TILE_CATEGORIES)) {
         if (names.includes(sprite.name)) {

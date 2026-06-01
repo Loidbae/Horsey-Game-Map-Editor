@@ -1,5 +1,7 @@
 # Horsey Map Editor
 
+**🌐 [Open in Browser](https://loidbae.github.io/Horsey-Game-Map-Editor/)**
+
 An unofficial map editor for [Horsey Game](https://store.steampowered.com/app/3602570/Horsey_Game/) — runs entirely in your browser, no installation required. Select your game folder once and start editing.
 
 > ⚠️ **Important:** Map changes are only visible when starting a **brand new save file**. Loading an existing save will not reflect your changes.

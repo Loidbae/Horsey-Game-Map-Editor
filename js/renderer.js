@@ -181,10 +181,21 @@ HME.render = function() {
 
       if (sx + ts < 0 || sy + ts < 0 || sx > canvas.width || sy > canvas.height) return;
 
-      const localId = obj.gid - locsFirst;
-      const sprite  = (HME.locsAtlas && localId >= 0) ? HME.locsAtlas[localId] : null;
+      const localId    = obj.gid - locsFirst;
+      const sprite     = (HME.locsAtlas && localId >= 0) ? HME.locsAtlas[localId] : null;
+      const isBuried   = obj.gid === 154;
+      const buriedId   = isBuried ? parseInt(obj.properties?.buried) : NaN;
+      const buriedItem = (!isNaN(buriedId) && HME.BURIED_ITEMS) ? HME.BURIED_ITEMS[buriedId] : null;
 
-      if (S.locsImg && sprite) {
+      ctx.imageSmoothingEnabled = false;
+      if (isBuried && buriedItem && S.spritesImg) {
+        const scale = Math.min((ts * 0.7) / buriedItem.sw, (ts * 0.7) / buriedItem.sh);
+        const dx = sx + Math.floor((ts - buriedItem.sw * scale) / 2);
+        const dy = sy + Math.floor((ts - buriedItem.sh * scale) / 2);
+        ctx.drawImage(S.spritesImg, buriedItem.sx, buriedItem.sy, buriedItem.sw, buriedItem.sh, dx, dy, buriedItem.sw * scale, buriedItem.sh * scale);
+        const sSize = Math.max(8, ts * 0.4);
+        ctx.drawImage(S.spritesImg, 7, 92, 8, 14, sx + 1, sy + 1, sSize * (8/14), sSize);
+      } else if (S.locsImg && sprite) {
         ctx.drawImage(S.locsImg, sprite.srcX, sprite.srcY, sprite.w, sprite.h, sx, sy, ts, ts);
       } else {
         const r = Math.max(3, Math.min(7, ts * 0.22));
@@ -205,14 +216,51 @@ HME.render = function() {
         ctx.lineWidth    = 2.5;
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'top';
-        ctx.strokeText(obj.type, sx + ts / 2, sy + ts + 1);
-        ctx.fillText(obj.type,   sx + ts / 2, sy + ts + 1);
+        const displayName = (isBuried && buriedItem) ? buriedItem.name : obj.type;
+        ctx.strokeText(displayName, sx + ts / 2, sy + ts + 1);
+        ctx.fillText(displayName,   sx + ts / 2, sy + ts + 1);
       }
 
       if (S.selObj && S.selObj.id === obj.id && !S.isDraggingObj) {
         ctx.strokeStyle = '#ffdd44';
         ctx.lineWidth   = 2;
         ctx.strokeRect(sx + 1, sy + 1, ts - 2, ts - 2);
+
+        const r = parseInt(obj.properties?.radius);
+        if (!isNaN(r) && r > 0 && HME.SPAWNER_GIDS[obj.gid]) {
+          const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+          const centerCol = Math.floor(obj.x / HME.TS);
+          const centerRow = Math.floor(obj.y / HME.TS) - 1;
+          ctx.fillStyle   = accentColor;
+          ctx.strokeStyle = accentColor;
+          ctx.lineWidth   = 2;
+          for (let dr = -r; dr <= r; dr++) {
+            for (let dc = -r; dc <= r; dc++) {
+              if (Math.sqrt(dc * dc + dr * dr) < r + 0.5) {
+                const tx = (centerCol + dc) * ts - S.panX;
+                const ty = (centerRow + dr) * ts - S.panY;
+                ctx.globalAlpha = 0.08;
+                ctx.fillRect(tx, ty, ts, ts);
+              }
+            }
+          }
+          ctx.globalAlpha = 0.8;
+          ctx.beginPath();
+          for (let dr = -r; dr <= r; dr++) {
+            for (let dc = -r; dc <= r; dc++) {
+              if (Math.sqrt(dc * dc + dr * dr) < r + 0.5) {
+                const tx = (centerCol + dc) * ts - S.panX;
+                const ty = (centerRow + dr) * ts - S.panY;
+                if (Math.sqrt(dc**2     + (dr-1)**2) >= r + 0.5) { ctx.moveTo(tx, ty);      ctx.lineTo(tx + ts, ty); }
+                if (Math.sqrt(dc**2     + (dr+1)**2) >= r + 0.5) { ctx.moveTo(tx, ty + ts); ctx.lineTo(tx + ts, ty + ts); }
+                if (Math.sqrt((dc-1)**2 + dr**2)     >= r + 0.5) { ctx.moveTo(tx, ty);      ctx.lineTo(tx, ty + ts); }
+                if (Math.sqrt((dc+1)**2 + dr**2)     >= r + 0.5) { ctx.moveTo(tx + ts, ty); ctx.lineTo(tx + ts, ty + ts); }
+              }
+            }
+          }
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
       }
     });
   }
@@ -264,8 +312,8 @@ HME.render = function() {
       ctx.imageSmoothingEnabled = false;
 
       if (brushSize > 1) {
-        for (let dr = -half; dr < -half + brushSize; dr++) {
-          for (let dc = -half; dc < -half + brushSize; dc++) {
+        for (let dr = -half; dr <= half; dr++) {
+          for (let dc = -half; dc <= half; dc++) {
             if (!HME.isTileInBrush(dc, dr, brushSize, brushShape)) continue;
             const bsx = (S.hovCol + dc) * ts - S.panX;
             const bsy = (S.hovRow + dr) * ts - S.panY;

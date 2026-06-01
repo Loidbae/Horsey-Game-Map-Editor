@@ -39,8 +39,15 @@ HME.initEditor = function() {
   if (kbFill)    kbFill.textContent    = (kb.toolFill    || 'g').toUpperCase();
 
   const helpBtn = document.getElementById('btn-help');
-  if (helpBtn && !localStorage.getItem('hme_v1_help_seen')) {
-    helpBtn.classList.add('help-pulse');
+  if (helpBtn && !localStorage.getItem('hme_v1_help_seen')) helpBtn.classList.add('help-pulse');
+
+  const patchBtn = document.getElementById('btn-patchnotes');
+  if (patchBtn) {
+    const seenVersion = localStorage.getItem('hme_v1_patchnotes_seen');
+    if (seenVersion !== HME.PATCHNOTES[0].version) {
+      patchBtn.classList.add('help-pulse');
+      patchBtn.classList.add('patchnotes-new');
+    }
   }
 
   HME.render();
@@ -54,6 +61,16 @@ HME.setupCanvasEvents = function() {
   const S      = HME.state;
 
   const DRAG_THRESHOLD = 5;
+
+  HME._rafPending = false;
+  HME.scheduleRender = function() {
+    if (HME._rafPending) return;
+    HME._rafPending = true;
+    requestAnimationFrame(() => {
+      HME._rafPending = false;
+      HME.render();
+    });
+  };
 
   canvas.addEventListener('mousemove', e => {
     const { col, row } = HME.screenToTile(e.offsetX, e.offsetY);
@@ -81,7 +98,22 @@ HME.setupCanvasEvents = function() {
 
     if (S.mode === 'paint') {
       document.getElementById('i-coord').textContent = `${col},${row}`;
-      if (S.isPainting) HME.paintAt(col, row);
+      if (S.isPainting) {
+        const c0 = S._lastPaintCol ?? col;
+        const r0 = S._lastPaintRow ?? row;
+        let dx = Math.abs(col - c0), sx = c0 < col ? 1 : -1;
+        let dy = -Math.abs(row - r0), sy = r0 < row ? 1 : -1;
+        let err = dx + dy, c = c0, r = r0;
+        while (true) {
+          HME.paintAt(c, r);
+          if (c === col && r === row) break;
+          const e2 = 2 * err;
+          if (e2 >= dy) { err += dy; c += sx; }
+          if (e2 <= dx) { err += dx; r += sy; }
+        }
+        S._lastPaintCol = col;
+        S._lastPaintRow = row;
+      }
     }
 
     if (S.isPanning && S.panStart) {
@@ -90,13 +122,13 @@ HME.setupCanvasEvents = function() {
       S.panY = S.panStart.py + (S.panStart.my - e.clientY);
       HME.clampPan();
     }
-    HME.render();
+    HME.scheduleRender();
   });
 
   canvas.addEventListener('mouseleave', () => {
     S.hovCol = -1;
     S.hovRow = -1;
-    HME.render();
+    HME.scheduleRender();
   });
 
   canvas.addEventListener('mousedown', e => {
@@ -161,6 +193,8 @@ HME.setupCanvasEvents = function() {
       }
 
       S.isPainting = true;
+      S._lastPaintCol = col;
+      S._lastPaintRow = row;
       S._paintSnap = [...S.map.layer.data];
       S._paintDiff = new Map();
       HME.paintAt(col, row);
@@ -225,6 +259,8 @@ HME.setupCanvasEvents = function() {
     }
     if (e.button === 0 && S.isPainting) {
       S.isPainting = false;
+      S._lastPaintCol = null;
+      S._lastPaintRow = null;
       HME.commitPaintUndo();
     }
   });
@@ -423,4 +459,15 @@ HME.checkAcknowledgment();
 document.addEventListener('click', () => {
   if (HME.closePaintDropdown) HME.closePaintDropdown();
   if (HME.closeHelpDropdown)  HME.closeHelpDropdown();
+  const gp = document.getElementById('grid-popup');
+  if (gp) gp.style.display = 'none';
 });
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    if (!HME.state.map) return;
+    const dlBtn = document.getElementById('btn-download-map');
+    if (dlBtn && !dlBtn.disabled) HME.doSaveAs();
+  }
+}, { capture: true });

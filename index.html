@@ -77,7 +77,7 @@
       <i class="ph ph-file-arrow-up"></i> Select Files Manually
     </button>
     <input type="file" id="files-input" multiple accept=".tmx,.tsx,.xml,.png,.json">
-    <div class="file-hint">Needs: horsey.tmx · terrain.xml · locs.xml · terrain.png · locs.png</div>
+    <div class="file-hint">Needs: horsey.tmx · terrain.xml · locs.xml · sprites.xml · terrain.png · locs.png · sprites.png</div>
     <div id="setup-status"></div>
   </div>
   <div class="setup-theme-row">
@@ -95,7 +95,6 @@
     <div class="menu-sep"></div>
     <button class="menu-btn" onclick="HME.openNewFiles()"><i class="ph ph-folder-open"></i> Load</button>
     <button id="btn-download-map" class="menu-btn" onclick="HME.doSaveAs()"><i class="ph ph-download-simple"></i> Download Map</button>
-    <button class="menu-btn" onclick="HME.showPatchnotesModal()"><i class="ph ph-newspaper"></i> Patch Notes</button>
     <div class="menu-btn-group" id="help-btn-wrap">
       <button class="menu-btn help-btn" id="btn-help" onclick="HME.toggleHelpDropdown(event)">
         <i class="ph ph-question"></i> Help
@@ -106,6 +105,9 @@
         </div>
       </div>
     </div>
+    <button class="menu-btn" id="btn-restore-menu" onclick="HME.doRestore()" title="Restore saved original map">
+      <i class="ph ph-clock-counter-clockwise"></i> Restore
+    </button>
     <div class="menu-spacer"></div>
     <div class="theme-picker">
       <i class="ph ph-palette"></i>
@@ -115,6 +117,7 @@
         <option value="hinamizawa">Hinamizawa</option>
       </select>
     </div>
+    <button class="menu-btn" id="btn-patchnotes" onclick="HME.showPatchnotesModal();HME.markPatchnotesSeen()"><i class="ph ph-newspaper"></i> Patch Notes</button>
     <button class="menu-btn settings-btn" onclick="HME.openSettings()" title="Settings">
       <i class="ph ph-gear-six"></i> Settings
     </button>
@@ -152,10 +155,18 @@
     <label class="toggle-lbl">
       <input type="checkbox" id="tog-locs" checked onchange="HME.render()"> Locs
     </label>
-    <div class="tool-sep"></div>
-    <button class="tool-btn" id="btn-restore" onclick="HME.doRestore()" title="Restore saved original map">
-      <i class="ph ph-clock-counter-clockwise"></i> Restore
-    </button>
+    <button class="tool-btn" id="btn-grid-settings" onclick="HME.toggleGridPopup(event)" title="Grid settings"><i class="ph ph-grid-four"></i> Grid</button>
+    <div id="grid-popup" style="display:none" class="grid-popup">
+      <div class="grid-popup-row">
+        <span class="grid-popup-lbl">Color</span>
+        <input type="color" id="set-grid-color" class="color-input" value="#ffffff" oninput="HME.updateGridColor()">
+      </div>
+      <div class="grid-popup-row">
+        <span class="grid-popup-lbl">Opacity</span>
+        <input type="range" id="set-grid-alpha" class="range-input" min="0" max="1" step="0.01" value="0.70" oninput="HME.updateGridColor();document.getElementById('set-grid-alpha-val').textContent=Math.round(this.value*100)+'%'">
+        <span class="settings-val" id="set-grid-alpha-val">70%</span>
+      </div>
+    </div>
     <div class="menu-spacer"></div>
     <div class="tool-sep"></div>
     <button class="tool-btn" id="btn-undo" onclick="HME.doUndo()" title="Ctrl+Z / Cmd+Z">
@@ -198,6 +209,23 @@
         <div class="r-row"><span class="r-lbl">GID</span><span class="r-val" id="oi-gid">—</span></div>
         <div class="r-row"><span class="r-lbl">X (px)</span><span class="r-val" id="oi-x">—</span></div>
         <div class="r-row"><span class="r-lbl">Y (px)</span><span class="r-val" id="oi-y">—</span></div>
+        <div class="r-row" id="oi-count-row" style="display:none">
+          <span class="r-lbl">Count</span>
+          <input class="r-val-input" id="oi-count" type="number" min="0" />
+        </div>
+        <div class="r-row" id="oi-radius-row" style="display:none">
+          <span class="r-lbl">Radius</span>
+          <input class="r-val-input" id="oi-radius" type="number" min="0" />
+        </div>
+        <div class="r-row" id="oi-buried-row" style="display:none">
+          <span class="r-lbl">Buried</span>
+          <div class="buried-input-wrap">
+            <img id="oi-buried-icon" style="display:none;width:16px;height:16px;image-rendering:pixelated;flex-shrink:0;" />
+            <input class="r-val-input" id="oi-buried" type="number" min="0" />
+            <button class="act-btn" id="oi-buried-browse" onclick="HME.toggleItemPicker()">Browse</button>
+          </div>
+        </div>
+        <div id="item-picker" style="display:none"></div>
         <div class="obj-actions">
           <button class="act-btn danger" onclick="HME.removeSelectedObj()">
             <i class="ph ph-trash"></i> Remove
@@ -221,17 +249,15 @@
       </div>
       <div class="settings-body">
         <div class="settings-section">
-          <div class="settings-sec-title">Appearance</div>
+          <div class="settings-sec-title">Performance</div>
           <div class="settings-row">
-            <span class="settings-lbl">Grid color</span>
-            <input type="color" id="set-grid-color" class="color-input" value="#ffffff" oninput="HME.updateGridColor()">
-          </div>
-          <div class="settings-row">
-            <span class="settings-lbl">Grid opacity</span>
-            <div style="display:flex;align-items:center;gap:6px">
-              <input type="range" id="set-grid-alpha" class="range-input" min="0" max="1" step="0.01" value="0.70" oninput="HME.updateGridColor();document.getElementById('set-grid-alpha-val').textContent=Math.round(this.value*100)+'%'">
-              <span class="settings-val" id="set-grid-alpha-val">70%</span>
-            </div>
+            <span class="settings-lbl">Fast rendering
+              <span class="spawner-info-btn" tabindex="0" title="On: Drawing is faster but makes map less detailed, at certain zoom levels.&#10;Off: Everything renders at full resolution, at any zoom level, makes drawing less smooth."><i class="ph ph-question"></i></span>
+            </span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="set-chunk-renderer" onchange="HME.setChunkRenderer(this.checked)" checked>
+              <span class="toggle-track"></span>
+            </label>
           </div>
         </div>
         <div class="settings-section">
@@ -432,6 +458,7 @@
 <script src="js/tmx.js"></script>
 <script src="js/loader.js"></script>
 <script src="js/renderer.js"></script>
+<script src="js/chunk-renderer.js"></script>
 <script src="js/palette.js"></script>
 <script src="js/editor.js"></script>
 <script src="js/ui.js"></script>

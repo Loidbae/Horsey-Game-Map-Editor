@@ -52,6 +52,7 @@ HME.handleFiles = async function(fileList) {
     if (name === 'locs.tsx')                  found.locsTSX    = file;
     if (name === 'terrain.png')               found.terrainPNG = file;
     if (name === 'locs.png')                  found.locsPNG    = file;
+    if (name === 'sprites.png')               found.spritesPNG = file;
   }
 
   if (!found.tmx) {
@@ -111,6 +112,9 @@ HME.handleFiles = async function(fileList) {
         : Promise.resolve(),
       found.locsPNG
         ? HME.loadImage(found.locsPNG).then(img => { HME.state.locsImg = img; }).catch(() => {})
+        : Promise.resolve(),
+      found.spritesPNG
+        ? HME.loadImage(found.spritesPNG).then(img => { HME.state.spritesImg = img; }).catch(() => {})
         : Promise.resolve(),
     ]);
 

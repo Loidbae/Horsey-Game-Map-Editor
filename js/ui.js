@@ -149,6 +149,88 @@ HME.updatePaintInspector = function() {
   document.getElementById('i-gid').textContent  = S.selTileGID;
 };
 
+HME._updateBuriedIcon = function(id) {
+  const icon = document.getElementById('oi-buried-icon');
+  if (!icon) return;
+  const item = HME.BURIED_ITEMS[id];
+  const img  = HME.state.spritesImg;
+  if (!item || !img) { icon.style.display = 'none'; return; }
+  const c = document.createElement('canvas');
+  c.width = 16; c.height = 16;
+  const cx = c.getContext('2d');
+  cx.imageSmoothingEnabled = false;
+  const scale = Math.min(16 / item.sw, 16 / item.sh);
+  const dx = Math.floor((16 - item.sw * scale) / 2);
+  const dy = Math.floor((16 - item.sh * scale) / 2);
+  cx.drawImage(img, item.sx, item.sy, item.sw, item.sh, dx, dy, item.sw * scale, item.sh * scale);
+  icon.src = c.toDataURL();
+  icon.style.display = 'inline';
+};
+
+HME.toggleItemPicker = function() {
+  const picker = document.getElementById('item-picker');
+  if (!picker) return;
+  if (picker.style.display === 'none') {
+    HME.buildItemPicker();
+    picker.style.display = 'block';
+  } else {
+    picker.style.display = 'none';
+  }
+};
+
+HME.buildItemPicker = function() {
+  const picker = document.getElementById('item-picker');
+  const input  = document.getElementById('oi-buried');
+  const obj    = HME.state.selObj;
+  if (!picker || !input || !obj) return;
+  const current = parseInt(input.value, 10);
+  const img     = HME.state.spritesImg;
+
+  const grid = document.createElement('div');
+  grid.className = 'item-picker-grid';
+
+  HME.BURIED_ITEMS.forEach(item => {
+    const chip = document.createElement('div');
+    chip.className = 'item-chip' + (item.id === current ? ' selected' : '');
+
+    if (img) {
+      const c = document.createElement('canvas');
+      c.width = 24; c.height = 24;
+      const cx = c.getContext('2d');
+      cx.imageSmoothingEnabled = false;
+      const scale = Math.min(24 / item.sw, 24 / item.sh);
+      const dx = Math.floor((24 - item.sw * scale) / 2);
+      const dy = Math.floor((24 - item.sh * scale) / 2);
+      cx.drawImage(img, item.sx, item.sy, item.sw, item.sh, dx, dy, item.sw * scale, item.sh * scale);
+      const i = document.createElement('img');
+      i.src = c.toDataURL();
+      chip.appendChild(i);
+    } else {
+      const ph = document.createElement('div');
+      ph.className = 'item-chip-fallback';
+      chip.appendChild(ph);
+    }
+
+    const lbl = document.createElement('span');
+    lbl.textContent = item.name;
+    chip.appendChild(lbl);
+
+    chip.addEventListener('click', () => {
+      input.value = item.id;
+      input.dispatchEvent(new Event('input'));
+      document.querySelectorAll('.item-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      HME._updateBuriedIcon(item.id);
+      document.getElementById('item-picker').style.display = 'none';
+    });
+
+    grid.appendChild(chip);
+  });
+
+  picker.innerHTML = '';
+  picker.appendChild(grid);
+};
+
 HME.selectObj = function(obj) {
   HME.state.selObj = obj;
   document.getElementById('obj-inspector').style.display = 'block';
@@ -156,6 +238,32 @@ HME.selectObj = function(obj) {
   document.getElementById('oi-gid').textContent  = obj.gid;
   document.getElementById('oi-x').textContent    = obj.x;
   document.getElementById('oi-y').textContent    = obj.y;
+
+  const props = obj.properties || {};
+
+  ['count', 'radius', 'buried'].forEach(key => {
+    const row   = document.getElementById(`oi-${key}-row`);
+    const input = document.getElementById(`oi-${key}`);
+    if (key in props) {
+      row.style.display = '';
+      input.value = props[key];
+      if (key === 'buried') {
+        const picker = document.getElementById('item-picker');
+        if (picker) picker.style.display = 'none';
+        HME._updateBuriedIcon(parseInt(props[key], 10));
+      }
+      input.oninput = () => {
+        if (input.value < 0) input.value = 0;
+        obj.properties[key] = input.value;
+        if (obj.propMeta && !(key in obj.propMeta)) obj.propMeta[key] = 'int';
+        if (key === 'radius') HME.render();
+        HME.setDirty?.();
+      };
+    } else {
+      row.style.display = 'none';
+      input.oninput = null;
+    }
+  });
 };
 
 HME._lerpRafId = null;
@@ -263,7 +371,16 @@ HME.openSettings = function() {
     btn.classList.remove('listening');
   });
 
+  const cb = document.getElementById('set-chunk-renderer');
+  if (cb) cb.checked = HME.USE_CHUNK_RENDERER;
+
   document.getElementById('settings-overlay').classList.add('open');
+};
+
+HME.setChunkRenderer = function(enabled) {
+  HME.USE_CHUNK_RENDERER = enabled;
+  if (enabled) HME.invalidateAllChunks();
+  HME.render();
 };
 
 HME.closeSettings = function() {
@@ -321,9 +438,49 @@ HME.resetSettings = function() {
   if (!confirm('Reset all settings to defaults?')) return;
   HME.settings = HME.defaultSettings();
   HME.state.paintTool = 'brush';
-  HME.saveSettings();
+
+  try { localStorage.removeItem(HME.SETTINGS_KEY); } catch(e) {}
+
+  try {
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('hme_') && k !== HME.ACK_KEY && k !== 'hme_v1_help_seen' && k !== HME.ORIG_TMX_KEY)
+      .forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
+  } catch(e) {}
+
+  const clearOrig = confirm('Also clear your saved restore baseline?\n\nThis will remove the original map snapshot used by the Restore button. Your map files on disk are NOT affected.');
+  if (clearOrig) {
+    try { localStorage.removeItem(HME.ORIG_TMX_KEY); } catch(e) {}
+  }
+
+  try { sessionStorage.removeItem(HME._THEME_KEY); } catch(e) {}
+
+  const expiry = 'expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax';
+  document.cookie = `${HME._THEME_COOKIE}=;${expiry}`;
+  document.cookie = `${HME._IFRAME_INIT_KEY}=;${expiry}`;
+
   HME.openSettings();
   HME.render();
+};
+
+HME.toggleGridPopup = function(e) {
+  const popup = document.getElementById('grid-popup');
+  if (!popup) return;
+  if (popup.style.display === 'none') {
+    const btn  = document.getElementById('btn-grid-settings');
+    const rect = btn.getBoundingClientRect();
+    popup.style.display = 'flex';
+    popup.style.top  = (rect.bottom + 6) + 'px';
+    popup.style.left = rect.left + 'px';
+  } else {
+    popup.style.display = 'none';
+  }
+  e.stopPropagation();
+};
+
+HME.markPatchnotesSeen = function() {
+  const btn = document.getElementById('btn-patchnotes');
+  if (btn) { btn.classList.remove('help-pulse'); btn.classList.remove('patchnotes-new'); }
+  try { localStorage.setItem('hme_v1_patchnotes_seen', HME.PATCHNOTES[0].version); } catch(e) {}
 };
 
 HME.showPatchnotesModal = function() {
@@ -465,6 +622,19 @@ HME.doRestore = function() {
 
 HME._performRestore = function(tmxText) {
   HME.parseTMX(tmxText);
+  if (HME.USE_CHUNK_RENDERER) HME.invalidateAllChunks();
+  const SPAWNER_EXCEPTIONS = new Set([145, 153]);
+  HME._requiredLocGIDs = new Set(
+    HME.state.map.objects
+      .filter(o => !HME.SPAWNER_GIDS[o.gid] || SPAWNER_EXCEPTIONS.has(o.gid))
+      .map(o => o.gid)
+  );
+  HME._missingLocQueue = [];
+  const placedGIDs = new Set(HME.state.map.objects.map(o => o.gid));
+  if (placedGIDs.has(HME.state.selLocGID)) {
+    HME.state.selLocGID  = null;
+    HME.state.selLocType = null;
+  }
   HME.state.undoStack = [];
   HME.state.redoStack = [];
   HME.state.selObj    = null;

@@ -13,8 +13,8 @@ HME.paintAt = function(col, row) {
   const half  = Math.floor(size / 2);
   let painted = false;
 
-  for (let dr = -half; dr < -half + size; dr++) {
-    for (let dc = -half; dc < -half + size; dc++) {
+  for (let dr = -half; dr <= half; dr++) {
+    for (let dc = -half; dc <= half; dc++) {
       if (!HME.isTileInBrush(dc, dr, size, shape)) continue;
       const c = col + dc;
       const r = row + dr;
@@ -25,6 +25,7 @@ HME.paintAt = function(col, row) {
         HME.state._paintDiff.set(idx, { from: l.data[idx], to: HME.state.selTileGID });
       }
       l.data[idx] = HME.state.selTileGID;
+      if (HME.USE_CHUNK_RENDERER) HME.invalidateChunk(c, r);
       painted = true;
     }
   }
@@ -53,6 +54,7 @@ HME.doUndo = function() {
   const op = HME.state.undoStack.pop();
   if (!op) return;
   op.undo();
+  if (HME.USE_CHUNK_RENDERER) HME.invalidateAllChunks();
   HME.state.redoStack.push(op);
   HME._syncUndoRedoButtons();
   if (HME.state.mode === 'object') HME.updateObjectWarning();
@@ -62,6 +64,7 @@ HME.doRedo = function() {
   const op = HME.state.redoStack.pop();
   if (!op) return;
   op.redo();
+  if (HME.USE_CHUNK_RENDERER) HME.invalidateAllChunks();
   HME.state.undoStack.push(op);
   HME._syncUndoRedoButtons();
   if (HME.state.mode === 'object') HME.updateObjectWarning();
@@ -92,6 +95,7 @@ HME.placeObj = function(col, row) {
   if (!HME.state.selLocGID) return;
   if (HME.objAt(col, row)) return;
   const isEntity = HME.ENTITY_SPAWNER_GIDS.has(HME.state.selLocGID);
+  const isBuried = HME.state.selLocGID === 154;
   const obj = {
     id:     HME.nextObjId(),
     type:   HME.state.selLocType,
@@ -100,7 +104,7 @@ HME.placeObj = function(col, row) {
     y:      (row + 1) * HME.TS,
     width:  HME.TS,
     height: HME.TS,
-    properties: isEntity ? { count: '10', radius: '5' } : {},
+    properties: isEntity ? { count: '10', radius: '5' } : isBuried ? { buried: '' } : {},
     propMeta:   isEntity ? { count: 'int', radius: 'int' } : {},
   };
   HME.state.map.objects.push(obj);
@@ -117,18 +121,19 @@ HME.placeObj = function(col, row) {
     },
     redo() {
       HME.state.map.objects.push(obj);
-      HME.state.selLocGID = null; HME.state.selLocType = null;
+      if (!isSpawner) { HME.state.selLocGID = null; HME.state.selLocType = null; }
       HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.buildObjectPal(); HME.render();
     },
   });
   if (HME.state.undoStack.length > 80) HME.state.undoStack.shift();
+  const isSpawner = !!HME.SPAWNER_GIDS[HME.state.selLocGID];
   HME.markModified();
   HME.selectObj(obj);
   HME.updateStats();
   HME.buildMinimap();
   HME.buildInspectList();
-  HME.state.selLocGID  = null;
-  HME.state.selLocType = null;
+  if (!isSpawner) { HME.state.selLocGID = null; HME.state.selLocType = null; }
+
   HME.updateObjectWarning();
   HME.buildObjectPal();
   HME._syncUndoRedoButtons();
@@ -147,7 +152,7 @@ HME.removeObj = function(obj) {
   HME.state.undoStack.push({
     undo() {
       HME.state.map.objects.splice(i, 0, obj);
-      HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.buildObjectPal(); HME.render();
+      HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.buildObjectPal(); HME.render(); HME.updateObjectWarning();
     },
     redo() {
       const idx = HME.state.map.objects.indexOf(obj);
@@ -156,7 +161,7 @@ HME.removeObj = function(obj) {
         HME.state.selObj = null;
         document.getElementById('obj-inspector').style.display = 'none';
       }
-      HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.buildObjectPal(); HME.render();
+      HME.updateStats(); HME.buildMinimap(); HME.buildInspectList(); HME.buildObjectPal(); HME.render(); HME.updateObjectWarning();
     },
   });
   if (HME.state.undoStack.length > 80) HME.state.undoStack.shift();
@@ -167,6 +172,7 @@ HME.removeObj = function(obj) {
   HME.buildObjectPal();
   HME._syncUndoRedoButtons();
   HME.render();
+  HME.updateObjectWarning();
 };
 
 HME.removeSelectedObj = function() {

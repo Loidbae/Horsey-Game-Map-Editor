@@ -254,9 +254,11 @@ HME.selectObj = function(obj) {
       }
       input.oninput = () => {
         if (input.value < 0) input.value = 0;
+        if (key === 'buried' && input.value > 48) input.value = 48;
         obj.properties[key] = input.value;
         if (obj.propMeta && !(key in obj.propMeta)) obj.propMeta[key] = 'int';
         if (key === 'radius') HME.render();
+        if (key === 'buried') { HME._updateBuriedIcon(parseInt(input.value, 10)); HME.render(); HME.buildInspectList(); HME.highlightInspectRow(obj); }
         HME.setDirty?.();
       };
     } else {

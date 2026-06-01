@@ -2,8 +2,8 @@
 
 HME.PATCHNOTES = [
   {
-    version: 'v0.1.1',
-    title: 'Qol changes and more',
+    version: 'v0.1.1a',
+    title: 'Qol changes and more + hotfix',
     sections: [
       {
         heading: 'Quality of life changes',
@@ -20,7 +20,12 @@ HME.PATCHNOTES = [
           'CHANGED reset defaults now also clears cookies and session storage variables (only for this app! All other cookies and session storage is fine!)',
           'ADDED grid button to ui and moved grid settings from the settings menu there',
           'CHANGED rendering to chunck based, to optimize drawing when entirely zoomed out, less detail when zoomed out',
-          'ADDED "fast rendering" setting, toggles between the old renderer and the new one'
+          'ADDED "fast rendering" setting, toggles between the old renderer and the new one',
+          'HOTFIX CHANGES BELOW (v0.1.1a)',
+          'FIXED item objects not updating until the user moves the mouse',
+          'FIXED item object in inspect mode updating at all',
+          'FIXED item object not changing at all when chaning through the input field',
+          'FIXED buried id being able to be greater than 48',
         ],
       },
     ],
